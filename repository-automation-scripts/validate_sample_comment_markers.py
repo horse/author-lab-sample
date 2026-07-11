@@ -20,6 +20,16 @@ BINARY_SUFFIXES = {
     ".mp4",
     ".zip",
 }
+SKIPPED_DIRECTORY_NAMES = {
+    ".git",
+    ".venv",
+    "venv",
+    "generated-site-output",
+    "__pycache__",
+    ".pytest_cache",
+    ".mypy_cache",
+    ".ruff_cache",
+}
 DEFAULT_IGNORED_PATTERNS = (
     ".git/**",
     ".venv/**",
@@ -36,6 +46,13 @@ DEFAULT_IGNORED_PATTERNS = (
 def load_json(path: Path) -> dict:
     with path.open("r", encoding="utf-8") as handle:
         return json.load(handle)
+
+
+def path_is_generated_or_environment_metadata(relative_path: Path) -> bool:
+    return any(
+        part in SKIPPED_DIRECTORY_NAMES or part.endswith(".egg-info")
+        for part in relative_path.parts
+    )
 
 
 def path_is_ignored(relative_path: str, patterns: list[str]) -> bool:
@@ -61,7 +78,10 @@ def iter_managed_text_files(
     for path in repository_root.rglob("*"):
         if not path.is_file() or path.suffix.lower() in BINARY_SUFFIXES:
             continue
-        relative_path = path.relative_to(repository_root).as_posix()
+        relative_path_object = path.relative_to(repository_root)
+        if path_is_generated_or_environment_metadata(relative_path_object):
+            continue
+        relative_path = relative_path_object.as_posix()
         if path_is_ignored(relative_path, ignored_patterns):
             continue
         yield path, relative_path
