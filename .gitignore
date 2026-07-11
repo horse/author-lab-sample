@@ -17,3 +17,9 @@ local-source-materials/
 private-source-materials/
 runtime-secrets/
 generated-site-output/
+
+# Primary source binaries are stored outside ordinary Git history.
+# Preserve directory documentation while ignoring source files.
+**/primary-source-materials/**/*
+!**/primary-source-materials/**/
+!**/primary-source-materials/**/README.md
