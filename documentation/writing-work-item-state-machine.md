@@ -76,14 +76,6 @@ Required stage 在相关 gate 通过前必须完成；optional stage 可以 `ski
 
 ```text
 factual_accuracy
-tpersona_and_style
-editorial_approval
-```
-
-其中实际字段名是 `persona_and_style`；上面的 `t` 不是字段字符，应读取为：
-
-```text
-factual_accuracy
 persona_and_style
 editorial_approval
 ```
