@@ -16,9 +16,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          fetch-depth: 0
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
         with:
           python-version: "3.11"
           cache: pip
@@ -40,18 +42,28 @@ jobs:
         run: python repository-automation-scripts/validate_writing_work_item_state.py
       - name: Validate writing run reproducibility
         run: python repository-automation-scripts/validate_writing_run_reproducibility.py
+      - name: Validate publication integrity
+        run: python repository-automation-scripts/validate_publication_integrity.py
       - name: Validate repository placeholders
         shell: bash
         run: |
           set -o pipefail
           python repository-automation-scripts/validate_sample_comment_markers.py \
             | tee "$RUNNER_TEMP/placeholder-validation.log"
+      - name: Run Ruff
+        run: ruff check repository-automation-scripts repository-validation-tests
+      - name: Run repository validation tests
+        shell: bash
+        run: |
+          set -o pipefail
+          pytest repository-validation-tests --tb=short 2>&1 \
+            | tee "$RUNNER_TEMP/pytest-validation.log"
       - name: Upload validation diagnostics
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: validation-diagnostics
-          path: ${{ runner.temp }}/placeholder-validation.log
+          path: |
+            ${{ runner.temp }}/placeholder-validation.log
+            ${{ runner.temp }}/pytest-validation.log
           if-no-files-found: ignore
-      - name: Run repository validation tests
-        run: pytest repository-validation-tests
