@@ -1,0 +1,19 @@
+{
+  "_sample_comment": "这是一个 sample，文件实质完成后删掉这行注释",
+  "schema_version": "1.0.0",
+  "repository_mode": "reference-sample",
+  "placeholder_policy": "all-managed-text-files",
+  "registered_placeholder_paths": [],
+  "active_author_lab_policy": "registered-placeholder-paths-only",
+  "ignored_generated_path_patterns": [
+    ".git/**",
+    ".venv/**",
+    "venv/**",
+    "**/__pycache__/**",
+    "**/*.egg-info/**",
+    ".pytest_cache/**",
+    ".mypy_cache/**",
+    ".ruff_cache/**",
+    "generated-site-output/**"
+  ]
+}
