@@ -8,8 +8,24 @@ from pathlib import Path
 import sys
 
 SAMPLE_MARKER = "这是一个 sample，文件实质完成后删掉这行注释"
-SKIPPED_DIRECTORIES = {".git", ".venv", "venv", "generated-site-output"}
+SKIPPED_DIRECTORY_NAMES = {
+    ".git",
+    ".venv",
+    "venv",
+    "generated-site-output",
+    "__pycache__",
+    ".pytest_cache",
+    ".mypy_cache",
+    ".ruff_cache",
+}
 BINARY_SUFFIXES = {".epub", ".pdf", ".jpg", ".jpeg", ".png", ".webp", ".mp3", ".mp4"}
+
+
+def path_is_generated_or_ignored(path: Path) -> bool:
+    return any(
+        part in SKIPPED_DIRECTORY_NAMES or part.endswith(".egg-info")
+        for part in path.parts
+    )
 
 
 def file_has_marker(path: Path) -> bool:
@@ -30,7 +46,7 @@ def main() -> int:
     for path in repository_root.rglob("*"):
         if not path.is_file() or path.suffix.lower() in BINARY_SUFFIXES:
             continue
-        if any(part in SKIPPED_DIRECTORIES for part in path.parts):
+        if path_is_generated_or_ignored(path.relative_to(repository_root)):
             continue
         checked += 1
         try:
