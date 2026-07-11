@@ -25,6 +25,7 @@ def prepare_minimal_repository(root: Path) -> None:
     write_json(
         root / "author-lab-project-manifest.json",
         {
+            "project_id": "test-author-lab",
             "author_model_experiments_directory": "author-model-experiments",
         },
     )
@@ -33,6 +34,8 @@ def prepare_minimal_repository(root: Path) -> None:
         {
             "runtime_adapter_id": "test-runtime",
             "configuration_version": "1.0.0",
+            "context_window_tokens": 32000,
+            "tool_capabilities": ["repository-read", "web-search"],
         },
     )
     write_json(
@@ -89,6 +92,19 @@ def test_experiment_scaffolder_creates_four_controlled_conditions(tmp_path):
         "derived-author-b",
         "derived-author-c",
     }
+    assert manifest["controlled_execution"] == {
+        "runtime_adapter_id": "test-runtime",
+        "runtime_adapter_version": "1.0.0",
+        "runbook_id": "test-runbook",
+        "runbook_version": "1.0.0",
+        "model_parameters": {},
+        "context_budget_tokens": 32000,
+        "tool_permissions": ["repository-read", "web-search"],
+        "repetition_count": 3,
+        "randomness_control": None,
+    }
+    assert all("runtime_adapter_id" not in condition for condition in manifest["conditions"])
+    assert all("runbook_id" not in condition for condition in manifest["conditions"])
     assert manifest["held_out_evaluation_pack_uri"].startswith("evaluator-storage://")
     assert (experiment_root / "controlled-inputs/README.md").is_file()
     assert (experiment_root / "runtime-run-records/README.md").is_file()
