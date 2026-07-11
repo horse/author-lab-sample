@@ -4,5 +4,15 @@
   "runbook_version": "1.0.0",
   "required_stages": ["intake", "scene-authorization", "planning", "drafting", "factual-review", "style-review", "editor-review"],
   "optional_stages": ["publication-preparation"],
-  "required_artifacts": ["brief.md", "authorized-scene-details.md", "article-plan.md", "draft-01.md", "factual-review-result.json", "style-review-result.json", "editor-review.md"]
+  "required_artifacts": ["writing-brief.md", "authorized-scene-details.md", "article-plan.md", "draft-01.md", "factual-review-result.json", "style-review-result.json", "editor-review.md"],
+  "artifact_templates": {
+    "writing-brief.md": "shared-writing-harness/artifact-templates/writing-brief-template.md",
+    "authorized-scene-details.md": "shared-writing-harness/artifact-templates/authorized-scene-details-template.md",
+    "article-plan.md": "shared-writing-harness/artifact-templates/article-plan-template.md",
+    "draft-01.md": "shared-writing-harness/artifact-templates/article-draft-template.md",
+    "factual-review-result.json": "shared-writing-harness/artifact-templates/factual-review-result-template.json",
+    "style-review-result.json": "shared-writing-harness/artifact-templates/style-review-result-template.json",
+    "editor-review.md": "shared-writing-harness/artifact-templates/editor-review-template.md"
+  },
+  "required_policy_rule_ids": ["POLICY-FACTUALITY-001", "POLICY-DERIVATION-001", "POLICY-ORIGINALITY-001", "POLICY-PUBLICATION-001"]
 }
