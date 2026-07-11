@@ -3,14 +3,19 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Writing Runbook Manifest",
   "type": "object",
-  "required": ["runbook_id", "runbook_version", "required_stages", "required_artifacts"],
+  "required": ["runbook_id", "runbook_version", "required_stages", "optional_stages", "required_artifacts", "artifact_templates", "required_policy_rule_ids"],
   "properties": {
     "_sample_comment": {"type": "string"},
-    "runbook_id": {"type": "string"},
+    "runbook_id": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
     "runbook_version": {"type": "string"},
-    "required_stages": {"type": "array", "items": {"type": "string"}},
-    "optional_stages": {"type": "array", "items": {"type": "string"}},
-    "required_artifacts": {"type": "array", "items": {"type": "string"}}
+    "required_stages": {"type": "array", "minItems": 1, "items": {"type": "string"}, "uniqueItems": true},
+    "optional_stages": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "required_artifacts": {"type": "array", "minItems": 1, "items": {"type": "string"}, "uniqueItems": true},
+    "artifact_templates": {
+      "type": "object",
+      "additionalProperties": {"type": "string"}
+    },
+    "required_policy_rule_ids": {"type": "array", "minItems": 1, "items": {"type": "string", "pattern": "^POLICY-[A-Z]+-[0-9]{3}$"}, "uniqueItems": true}
   },
-  "additionalProperties": true
+  "additionalProperties": false
 }
