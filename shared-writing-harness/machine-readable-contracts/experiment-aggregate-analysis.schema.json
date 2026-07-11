@@ -1,0 +1,18 @@
+{
+  "_sample_comment": "这是一个 sample，文件实质完成后删掉这行注释",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Experiment Aggregate Analysis",
+  "type": "object",
+  "required": ["experiment_id", "analysis_status", "condition_summary", "evaluator_agreement", "excluded_run_count", "failure_case_count", "conclusion_supported"],
+  "properties": {
+    "_sample_comment": {"type": "string"},
+    "experiment_id": {"type": "string", "pattern": "^experiment-"},
+    "analysis_status": {"enum": ["not-run", "in-progress", "completed"]},
+    "condition_summary": {"type": "object"},
+    "evaluator_agreement": {"type": ["number", "null"], "minimum": 0.0, "maximum": 1.0},
+    "excluded_run_count": {"type": "integer", "minimum": 0},
+    "failure_case_count": {"type": "integer", "minimum": 0},
+    "conclusion_supported": {"type": ["boolean", "null"]}
+  },
+  "additionalProperties": false
+}
