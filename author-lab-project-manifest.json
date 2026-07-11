@@ -4,7 +4,8 @@
   "project_id": "author-lab-sample",
   "project_type": "source-author-and-derived-author-laboratory",
   "default_language": "zh-Hans",
-  "repository_status": "sample-scaffold",
+  "repository_mode": "reference-sample",
+  "readiness_status": "pre-real-run-complete",
   "source_author_directories": [
     "source-authors/source-author-sample"
   ],
@@ -16,8 +17,17 @@
     "derived-author-personas/derived-author-sample-c"
   ],
   "shared_writing_harness_directory": "shared-writing-harness",
+  "runtime_adapters_directory": "runtime-adapters",
   "writing_work_items_directory": "writing-work-items",
+  "author_model_evaluations_directory": "author-model-evaluations",
+  "author_model_experiments_directory": "author-model-experiments",
   "approved_publications_directory": "approved-publications",
+  "component_status_register": "repository-component-status-register.json",
+  "placeholder_register": "repository-placeholder-register.json",
+  "source_material_storage_register": "source-material-storage-and-ingestion-register.jsonl",
+  "document_schema_registry": "shared-writing-harness/machine-readable-contracts/document-schema-registry.json",
+  "persona_scaffold_template_manifest": "shared-writing-harness/scaffold-templates/derived-author-persona-template/template-manifest.json",
+  "policy_rule_register": "shared-writing-harness/harness-policies/policy-rule-register.jsonl",
   "rights_policy": "RIGHTS-AND-LICENSING-POLICY.md",
   "ethics_policy": "ETHICS-AND-DERIVATION-DISCLOSURE-POLICY.md"
 }
