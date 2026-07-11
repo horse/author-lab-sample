@@ -1,0 +1,17 @@
+{
+  "_sample_comment": "这是一个 sample，文件实质完成后删掉这行注释",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Research Claim Evidence Record",
+  "type": "object",
+  "required": ["research_claim_id", "claim", "confidence", "status", "supporting_segments", "counterexample_segments"],
+  "properties": {
+    "_sample_comment": {"type": "string"},
+    "research_claim_id": {"type": "string", "pattern": "^RESEARCH-CLAIM-[0-9]{4,}$"},
+    "claim": {"type": "string", "minLength": 1},
+    "confidence": {"type": "number", "minimum": 0.0, "maximum": 1.0},
+    "status": {"type": "string", "minLength": 1},
+    "supporting_segments": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "counterexample_segments": {"type": "array", "items": {"type": "string"}, "uniqueItems": true}
+  },
+  "additionalProperties": false
+}
