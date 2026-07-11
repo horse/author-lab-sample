@@ -16,7 +16,8 @@
     "lifecycle_status",
     "stage_executions",
     "quality_gates",
-    "publication"
+    "publication",
+    "archive_reason"
   ],
   "properties": {
     "_sample_comment": {"type": "string"},
@@ -29,7 +30,7 @@
     "runbook_version": {"type": "string"},
     "runtime_adapter_id": {"type": "string"},
     "runtime_adapter_version": {"type": "string"},
-    "lifecycle_status": {"enum": ["intake", "in-progress", "under-review", "approved", "published", "archived"]},
+    "lifecycle_status": {"enum": ["intake", "in-progress", "under-review", "approved", "published", "rejected", "cancelled", "abandoned", "superseded", "archived"]},
     "stage_executions": {
       "type": "object",
       "minProperties": 1,
@@ -55,7 +56,23 @@
       },
       "additionalProperties": false
     },
-    "publication": {"type": ["object", "null"]}
+    "publication": {
+      "oneOf": [
+        {"type": "null"},
+        {
+          "type": "object",
+          "required": ["publication_id", "publication_status", "canonical_file", "published_at"],
+          "properties": {
+            "publication_id": {"type": "string", "pattern": "^publication-[0-9]{4}-[0-9]{3}-[a-z0-9]+(?:-[a-z0-9]+)*$"},
+            "publication_status": {"enum": ["approved", "published", "withdrawn"]},
+            "canonical_file": {"type": "string", "minLength": 1},
+            "published_at": {"type": ["string", "null"], "format": "date-time"}
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "archive_reason": {"type": ["string", "null"], "minLength": 1}
   },
   "additionalProperties": false
 }
