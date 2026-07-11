@@ -54,11 +54,23 @@
       "minItems": 4,
       "items": {
         "type": "object",
-        "required": ["condition_id", "condition_role", "author_condition"],
+        "required": [
+          "condition_id",
+          "condition_role",
+          "persona_id",
+          "author_model_id",
+          "author_model_version",
+          "source_author_model_id",
+          "source_author_model_version"
+        ],
         "properties": {
-          "condition_id": {"type": "string"},
+          "condition_id": {"type": "string", "pattern": "^condition-[a-z0-9]+(?:-[a-z0-9]+)*$"},
           "condition_role": {"enum": ["generic-runtime-baseline", "source-model-direct-baseline", "derived-author-b", "derived-author-c", "additional-controlled-condition"]},
-          "author_condition": {"type": ["string", "null"]}
+          "persona_id": {"type": ["string", "null"]},
+          "author_model_id": {"type": ["string", "null"]},
+          "author_model_version": {"type": ["string", "null"]},
+          "source_author_model_id": {"type": ["string", "null"]},
+          "source_author_model_version": {"type": ["string", "null"]}
         },
         "additionalProperties": false
       }
