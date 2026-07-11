@@ -2,23 +2,26 @@
 
 <!-- 这是一个 sample，文件实质完成后删掉这行注释 -->
 
-本目录保存 Author Lab 的权威架构、逐文件职责、研究方法、运行合同、政策解释、术语和实施记录。仓库操作边界以根级与局部 `AGENTS.md` 为准；机器接口以 `shared-writing-harness/machine-readable-contracts/` 及其 registry 为准。
+本目录保存 Author Lab 的权威架构、逐文件职责、研究方法、运行合同、政策解释、术语、template 治理和实施记录。仓库操作边界以根级与局部 `AGENTS.md` 为准；机器接口以 `shared-writing-harness/machine-readable-contracts/` 及其 registry 为准。
 
 ## 首先阅读
 
 1. [`complete-repository-file-and-directory-reference.md`](complete-repository-file-and-directory-reference.md) — 当前完整目录、文件职责与实际工作方式的权威说明。
-2. [`pre-real-run-remediation-design.md`](pre-real-run-remediation-design.md) — 外部审查后对 active mode、原子脚手架、provenance、实验、运行历史和出版事务的修复设计。
-3. [`repository-architecture-and-data-flow.md`](repository-architecture-and-data-flow.md) — 单向数据流、控制平面、机器合同、不可变运行、实验和可恢复出版。
-4. [`pre-real-run-complete-repository-design.md`](pre-real-run-complete-repository-design.md) — 最初“真实实跑前完整仓库”的目标、边界和完成标准。
-5. [`glossary-of-author-lab-terms.md`](glossary-of-author-lab-terms.md) — 核心术语。
+2. [`template-repository-governance-and-backup.md`](template-repository-governance-and-backup.md) — canonical sample 的长期治理、Template、Ruleset、冻结标签与备份边界。
+3. [`new-author-lab-project-bootstrap-prompt.md`](new-author-lab-project-bootstrap-prompt.md) — 从 GitHub template 建立独立 active Author Lab 的完整新对话提示词。
+4. [`pre-real-run-remediation-design.md`](pre-real-run-remediation-design.md) — 外部审查后对 active mode、原子脚手架、provenance、实验、运行历史和出版事务的修复设计。
+5. [`repository-architecture-and-data-flow.md`](repository-architecture-and-data-flow.md) — 单向数据流、控制平面、机器合同、不可变运行、实验和可恢复出版。
+6. [`pre-real-run-complete-repository-design.md`](pre-real-run-complete-repository-design.md) — 最初“真实实跑前完整仓库”的目标、边界和完成标准。
+7. [`glossary-of-author-lab-terms.md`](glossary-of-author-lab-terms.md) — 核心术语。
 
 ## 当前状态来源
 
-- 根 `README.md` — 面向读者的总体状态与完整验证命令。
+- 根 `README.md` — 面向读者的总体状态、canonical template 身份与完整验证命令。
 - `repository-component-status-register.json` — Core / Optional / Example、实现状态、真实内容状态与实验验证状态。
 - `CHANGELOG.md` — 按日期与里程碑记录结构变化，不使用并存的仓库版本体系。
 - `author-lab-project-manifest.json` — repository mode、readiness 与所有机器入口。
 - `.github/workflows/validate-author-lab-repository.yml` — 实际 CI 顺序。
+- `.github/OWNER-TEMPLATE-LOCK-CHECKLIST.md` — owner-only GitHub 设置与备份执行状态；未勾选项目不得视为完成。
 
 ## 研究与模型方法
 
@@ -37,8 +40,9 @@
 
 ## 实施记录
 
-`implementation-plans/` 保存已执行或正在执行的仓库变更计划。当前修复计划为：
+`implementation-plans/` 保存已执行或正在执行的仓库变更计划。当前相关计划：
 
 - `2026-07-11-complete-pre-real-run-remediation.md`
+- `2026-07-11-freeze-template-and-bootstrap.md`
 
 计划说明一次变更怎样完成，不取代长期规范，也不代表真实实验结果。
