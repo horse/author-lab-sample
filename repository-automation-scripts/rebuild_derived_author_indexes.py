@@ -15,7 +15,6 @@ if str(SCRIPT_DIRECTORY) not in sys.path:
 from atomic_repository_update import atomic_replace_text_files  # noqa: E402
 from repository_mode_support import (  # noqa: E402
     RepositoryModeContext,
-    dump_json,
     load_json,
 )
 
@@ -139,12 +138,16 @@ def build_persona_index_documents(
 
         work_path = (
             persona_root
-            / persona_manifest["work_items_directory"]
+            / persona_manifest.get(
+                "work_items_directory", "derived-author-writing-work-items"
+            )
             / "derived-author-work-item-index.jsonl"
         )
         publication_path = (
             persona_root
-            / persona_manifest["publications_directory"]
+            / persona_manifest.get(
+                "publications_directory", "derived-author-publications"
+            )
             / "derived-author-publication-index.jsonl"
         )
         updates[work_path] = serialize_jsonl(
