@@ -41,6 +41,15 @@ DEFAULT_IGNORED_PATTERNS = (
     ".ruff_cache/**",
     "generated-site-output/**",
 )
+ACTIVE_SAMPLE_SENTINELS = (
+    SAMPLE_MARKER,
+    "SAMPLE-NOT-RUN",
+    "SAMPLE-NOT-PUBLISHED",
+    "replace-with-real-checksum",
+    "sample-placeholder",
+    "sample-unreviewed",
+    "sample-development",
+)
 
 
 def load_json(path: Path) -> dict:
@@ -65,10 +74,18 @@ def file_has_marker(path: Path) -> bool:
     if path.suffix == ".jsonl":
         with path.open("r", encoding="utf-8") as handle:
             first_record = next((line for line in handle if line.strip()), "")
-        return bool(first_record) and json.loads(first_record).get(
-            "_sample_comment"
-        ) == SAMPLE_MARKER
+        if not first_record:
+            return True
+        return json.loads(first_record).get("_sample_comment") == SAMPLE_MARKER
     return SAMPLE_MARKER in path.read_text(encoding="utf-8")
+
+
+def file_contains_active_sample_sentinel(path: Path) -> str | None:
+    text = path.read_text(encoding="utf-8")
+    for sentinel in ACTIVE_SAMPLE_SENTINELS:
+        if sentinel in text:
+            return sentinel
+    return None
 
 
 def iter_managed_text_files(
@@ -90,7 +107,9 @@ def iter_managed_text_files(
 def validate_placeholders(repository_root: Path) -> list[str]:
     project_path = repository_root / "author-lab-project-manifest.json"
     if not project_path.is_file():
-        return ["author-lab-project-manifest.json: required repository control file is missing"]
+        return [
+            "author-lab-project-manifest.json: required repository control file is missing"
+        ]
     project = load_json(project_path)
     register_path = repository_root / project["placeholder_register"]
     if not register_path.is_file():
@@ -134,7 +153,9 @@ def validate_placeholders(repository_root: Path) -> list[str]:
         for registered_path in sorted(registered_set):
             path = repository_root / registered_path
             if not path.is_file():
-                errors.append(f"{registered_path}: registered placeholder file does not exist")
+                errors.append(
+                    f"{registered_path}: registered placeholder file does not exist"
+                )
                 continue
             try:
                 if not file_has_marker(path):
@@ -151,9 +172,11 @@ def validate_placeholders(repository_root: Path) -> list[str]:
             if relative_path in registered_set:
                 continue
             try:
-                if file_has_marker(path):
+                sentinel = file_contains_active_sample_sentinel(path)
+                if sentinel is not None:
                     errors.append(
-                        f"{relative_path}: unregistered production file still contains sample marker"
+                        f"{relative_path}: unregistered production file contains sample "
+                        f"sentinel {sentinel!r}"
                     )
             except (OSError, UnicodeDecodeError, json.JSONDecodeError, StopIteration):
                 errors.append(f"{relative_path}: could not validate sample marker")
