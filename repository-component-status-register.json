@@ -16,9 +16,9 @@
       "component_id": "source-author-research-layer",
       "path": "source-author-research",
       "component_class": "core",
-      "implementation_status": "scaffolded",
-      "validation_status": "claim-schema-and-provenance-chain-validated",
-      "production_ready": false,
+      "implementation_status": "implemented",
+      "validation_status": "author-scoped-claim-schema-cross-author-isolation-and-accepted-claim-gate-validated",
+      "production_ready": true,
       "real_content_status": "sample-only",
       "experimentally_validated": false
     },
@@ -26,9 +26,9 @@
       "component_id": "source-author-model-layer",
       "path": "source-author-models",
       "component_class": "core",
-      "implementation_status": "scaffolded",
-      "validation_status": "schema-cross-reference-and-provenance-validated",
-      "production_ready": false,
+      "implementation_status": "implemented",
+      "validation_status": "author-scoped-provenance-model-rule-status-and-cross-reference-validated",
+      "production_ready": true,
       "real_content_status": "sample-only",
       "experimentally_validated": false
     },
@@ -37,7 +37,7 @@
       "path": "derived-author-personas",
       "component_class": "core",
       "implementation_status": "implemented",
-      "validation_status": "template-schema-index-and-cross-reference-validated",
+      "validation_status": "mode-aware-atomic-template-source-model-registration-and-index-validated",
       "production_ready": true,
       "real_content_status": "sample-only",
       "experimentally_validated": false
@@ -47,7 +47,7 @@
       "path": "shared-writing-harness",
       "component_class": "core",
       "implementation_status": "implemented",
-      "validation_status": "schema-registry-runbook-policy-and-template-validated",
+      "validation_status": "schema-registry-runbook-policy-template-and-mode-contract-validated",
       "production_ready": true,
       "real_content_status": "not-applicable",
       "experimentally_validated": false
@@ -57,7 +57,7 @@
       "path": "writing-work-items",
       "component_class": "core",
       "implementation_status": "implemented",
-      "validation_status": "runbook-state-gate-run-hash-and-cross-reference-validated",
+      "validation_status": "atomic-runbook-state-gate-immutable-commit-pinned-run-and-cross-reference-validated",
       "production_ready": true,
       "real_content_status": "sample-only",
       "experimentally_validated": false
@@ -77,7 +77,7 @@
       "path": "author-model-experiments",
       "component_class": "core",
       "implementation_status": "implemented",
-      "validation_status": "four-condition-controlled-execution-held-out-and-result-schema-validated",
+      "validation_status": "atomic-four-condition-exact-model-version-distinction-held-out-and-result-contract-validated",
       "production_ready": true,
       "real_content_status": "sample-only",
       "experimentally_validated": false
@@ -87,9 +87,9 @@
       "path": "approved-publications",
       "component_class": "core",
       "implementation_status": "implemented",
-      "validation_status": "transaction-gated-schema-and-cross-reference-validated",
+      "validation_status": "recoverable-lock-journal-staging-hash-manifest-state-index-and-independent-integrity-validated",
       "production_ready": true,
-      "real_content_status": "sample-only",
+      "real_content_status": "not-started",
       "experimentally_validated": false
     },
     {
@@ -157,7 +157,7 @@
       "path": "source-authors/source-author-sample",
       "component_class": "example",
       "implementation_status": "scaffolded",
-      "validation_status": "schema-structure-storage-and-segment-validated",
+      "validation_status": "schema-structure-storage-segment-and-author-scoped-provenance-validated",
       "production_ready": false,
       "real_content_status": "sample-only",
       "experimentally_validated": false
@@ -167,7 +167,7 @@
       "path": "derived-author-personas",
       "component_class": "example",
       "implementation_status": "scaffolded",
-      "validation_status": "template-and-index-validated",
+      "validation_status": "template-registration-mode-and-index-validated",
       "production_ready": false,
       "real_content_status": "sample-only",
       "experimentally_validated": false
