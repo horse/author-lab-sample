@@ -6,6 +6,36 @@
 
 它已经完成“真实实跑前”的结构与执行整备，但尚未填入真实作者资料，也尚未运行第一场正式 A→B/C 对照实验。
 
+## 长期身份
+
+本仓库长期保持为 canonical reference template：
+
+```text
+repository_mode = reference-sample
+real author content = absent
+real experiments = not run
+production publications = none
+```
+
+真实作者项目不得在本仓库中直接开发。正确流程是：
+
+```text
+Use this template
+→ 创建独立 GitHub repository
+→ clone 新 repository
+→ 转换为 active-author-lab
+→ 在新仓库中开展真实研究与实验
+```
+
+长期治理、Ruleset、冻结标签和外部备份说明见：
+
+- `documentation/template-repository-governance-and-backup.md`
+- `.github/OWNER-TEMPLATE-LOCK-CHECKLIST.md`
+
+用于新对话和新项目的完整启动提示词见：
+
+- `documentation/new-author-lab-project-bootstrap-prompt.md`
+
 ## 当前状态
 
 | 层次 | 状态 | 含义 |
@@ -61,7 +91,7 @@ source materials
 - `reference-sample`：所有有内容的受管文本记录必须保留 sample marker；允许真正为空的 JSONL canonical manifest。
 - `active-author-lab`：只有 `repository-placeholder-register.json` 登记的未完成文件可以保留 marker；生成器不会写入 sample marker、sample status 或 sample sentinel。
 
-这使 sample 可以逐文件转化为真实项目，而不需要关闭 CI。
+Sample 本身长期保持 `reference-sample`。模式转换只应发生在从 template 创建的独立真实项目仓库中。
 
 ## 完整验证
 
