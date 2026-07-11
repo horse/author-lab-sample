@@ -25,24 +25,21 @@ def write_json(path: Path, document: dict) -> None:
 
 
 def prepare_repository(root: Path, mode: str, policy: str, registered: list[str]) -> None:
-    write_json(
-        root / "author-lab-project-manifest.json",
-        {
-            "_sample_comment": SAMPLE_MARKER,
-            "repository_mode": mode,
-            "placeholder_register": "repository-placeholder-register.json",
-        },
-    )
-    write_json(
-        root / "repository-placeholder-register.json",
-        {
-            "_sample_comment": SAMPLE_MARKER,
-            "repository_mode": mode,
-            "placeholder_policy": policy,
-            "registered_placeholder_paths": registered,
-            "ignored_generated_path_patterns": [],
-        },
-    )
+    project = {
+        "repository_mode": mode,
+        "placeholder_register": "repository-placeholder-register.json",
+    }
+    register = {
+        "repository_mode": mode,
+        "placeholder_policy": policy,
+        "registered_placeholder_paths": registered,
+        "ignored_generated_path_patterns": [],
+    }
+    if mode == "reference-sample":
+        project["_sample_comment"] = SAMPLE_MARKER
+        register["_sample_comment"] = SAMPLE_MARKER
+    write_json(root / "author-lab-project-manifest.json", project)
+    write_json(root / "repository-placeholder-register.json", register)
 
 
 def test_current_repository_placeholder_policy_passes():
