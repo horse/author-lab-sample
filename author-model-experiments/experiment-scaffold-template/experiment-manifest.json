@@ -4,34 +4,37 @@
   "experiment_status": "designed",
   "hypothesis_file": "hypothesis.md",
   "controlled_input_directory": "controlled-inputs",
+  "controlled_execution": {
+    "runtime_adapter_id": "chatgpt-runtime-adapter",
+    "runtime_adapter_version": "0.1.0",
+    "runbook_id": "standard-researched-essay",
+    "runbook_version": "1.0.0",
+    "model_parameters": {},
+    "context_budget_tokens": null,
+    "tool_permissions": ["web-search", "github", "file-analysis"],
+    "repetition_count": 3,
+    "randomness_control": null
+  },
   "conditions": [
     {
       "condition_id": "condition-generic-runtime-baseline",
       "condition_role": "generic-runtime-baseline",
-      "author_condition": null,
-      "runtime_adapter_id": "chatgpt-runtime-adapter",
-      "runbook_id": "standard-researched-essay"
+      "author_condition": null
     },
     {
       "condition_id": "condition-source-model-direct-baseline",
       "condition_role": "source-model-direct-baseline",
-      "author_condition": "source-author-sample-model",
-      "runtime_adapter_id": "chatgpt-runtime-adapter",
-      "runbook_id": "standard-researched-essay"
+      "author_condition": "source-author-sample-model"
     },
     {
       "condition_id": "condition-derived-author-b",
       "condition_role": "derived-author-b",
-      "author_condition": "derived-author-sample-b",
-      "runtime_adapter_id": "chatgpt-runtime-adapter",
-      "runbook_id": "standard-researched-essay"
+      "author_condition": "derived-author-sample-b"
     },
     {
       "condition_id": "condition-derived-author-c",
       "condition_role": "derived-author-c",
-      "author_condition": "derived-author-sample-c",
-      "runtime_adapter_id": "chatgpt-runtime-adapter",
-      "runbook_id": "standard-researched-essay"
+      "author_condition": "derived-author-sample-c"
     }
   ],
   "held_out_evaluation_pack_uri": "evaluator-storage://author-lab-sample/experiment-2026-001/held-out-pack",
