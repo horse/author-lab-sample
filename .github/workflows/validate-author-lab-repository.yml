@@ -51,7 +51,11 @@ jobs:
           python repository-automation-scripts/validate_sample_comment_markers.py \
             | tee "$RUNNER_TEMP/placeholder-validation.log"
       - name: Run Ruff
-        run: ruff check repository-automation-scripts repository-validation-tests
+        shell: bash
+        run: |
+          set -o pipefail
+          ruff check repository-automation-scripts repository-validation-tests \
+            --output-format=concise 2>&1 | tee "$RUNNER_TEMP/ruff-validation.log"
       - name: Run repository validation tests
         shell: bash
         run: |
@@ -65,5 +69,6 @@ jobs:
           name: validation-diagnostics
           path: |
             ${{ runner.temp }}/placeholder-validation.log
+            ${{ runner.temp }}/ruff-validation.log
             ${{ runner.temp }}/pytest-validation.log
           if-no-files-found: ignore
