@@ -3,13 +3,21 @@
 
 from __future__ import annotations
 
-import os
 from pathlib import Path
+import sys
 
-from publication_gate_support import (
+SCRIPT_DIRECTORY = Path(__file__).resolve().parent
+if str(SCRIPT_DIRECTORY) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIRECTORY))
+
+from atomic_repository_update import atomic_replace_text_files  # noqa: E402
+from publication_gate_support import (  # noqa: E402
     collect_publication_records,
     load_json,
     serialize_publication_manifest,
+)
+from rebuild_derived_author_indexes import (  # noqa: E402
+    build_persona_index_documents,
 )
 
 
@@ -21,16 +29,16 @@ def main() -> int:
     records = collect_publication_records(repository_root, publications_directory)
 
     manifest_path = publications_root / "approved-publication-manifest.jsonl"
-    manifest_path.parent.mkdir(parents=True, exist_ok=True)
-    temporary_path = manifest_path.with_suffix(".jsonl.tmp")
-    temporary_path.write_text(
-        serialize_publication_manifest(records),
-        encoding="utf-8",
-    )
-    os.replace(temporary_path, manifest_path)
+    updates = {
+        manifest_path: serialize_publication_manifest(records),
+        **build_persona_index_documents(
+            repository_root, project, publication_records=records
+        ),
+    }
+    atomic_replace_text_files(updates)
     print(
-        f"Validated and wrote {max(len(records), 1)} publication manifest record(s) "
-        f"to {manifest_path}"
+        f"Validated and wrote {len(records)} publication manifest record(s) "
+        f"to {manifest_path}; rebuilt persona publication indexes."
     )
     return 0
 
