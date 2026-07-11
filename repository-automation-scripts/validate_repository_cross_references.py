@@ -22,6 +22,8 @@ def load_json(path: Path) -> dict[str, Any]:
 
 
 def load_jsonl(path: Path) -> Iterable[dict[str, Any]]:
+    if not path.is_file():
+        return
     with path.open("r", encoding="utf-8") as handle:
         for line in handle:
             if line.strip():
@@ -32,14 +34,18 @@ def validate_source_layers(
     repository_root: Path,
     project: dict[str, Any],
     errors: list[str],
-) -> tuple[dict[str, Path], dict[str, dict[str, Any]]]:
+) -> tuple[dict[str, Path], dict[str, tuple[str, dict[str, Any]]]]:
     source_authors: dict[str, Path] = {}
-    source_records: dict[str, tuple[str, Path, dict[str, Any]]] = {}
+    source_records: dict[str, tuple[str, dict[str, Any]]] = {}
     rights_records: dict[str, dict[str, Any]] = {}
 
-    for directory in project["source_author_directories"]:
+    for directory in project.get("source_author_directories", []):
         author_root = repository_root / directory
-        profile = load_json(author_root / "source-author-profile.json")
+        profile_path = author_root / "source-author-profile.json"
+        if not profile_path.is_file():
+            errors.append(f"Source author directory lacks profile: {directory}")
+            continue
+        profile = load_json(profile_path)
         source_author_id = profile["source_author_id"]
         if source_author_id in source_authors:
             errors.append(f"Duplicate source_author_id: {source_author_id}")
@@ -51,8 +57,7 @@ def validate_source_layers(
             source_id = record["source_id"]
             if source_id in source_records:
                 errors.append(f"Duplicate source_id: {source_id}")
-            source_records[source_id] = (source_author_id, corpus_root, record)
-
+            source_records[source_id] = (source_author_id, record)
             normalized_path = corpus_root / record["normalized_text"]
             location_map_path = corpus_root / record["segment_location_map"]
             if not normalized_path.is_file():
@@ -69,7 +74,9 @@ def validate_source_layers(
                 for segment in load_jsonl(location_map_path):
                     segment_id = segment["segment_id"]
                     if segment_id in seen_segment_ids:
-                        errors.append(f"Duplicate segment_id in {location_map_path}: {segment_id}")
+                        errors.append(
+                            f"Duplicate segment_id in {location_map_path}: {segment_id}"
+                        )
                     seen_segment_ids.add(segment_id)
                     if segment["source_id"] != source_id:
                         errors.append(f"Segment {segment_id} references wrong source_id")
@@ -89,7 +96,9 @@ def validate_source_layers(
             rights_records[source_id] = record
 
     storage_records: dict[str, dict[str, Any]] = {}
-    for record in load_jsonl(repository_root / project["source_material_storage_register"]):
+    for record in load_jsonl(
+        repository_root / project["source_material_storage_register"]
+    ):
         source_id = record["source_id"]
         if source_id in storage_records:
             errors.append(f"Duplicate storage record for source_id: {source_id}")
@@ -99,7 +108,7 @@ def validate_source_layers(
         if source_id not in source_records:
             errors.append(f"Storage record references unknown source_id: {source_id}")
 
-    for source_id, (source_author_id, _, corpus_record) in source_records.items():
+    for source_id, (source_author_id, corpus_record) in source_records.items():
         rights_record = rights_records.get(source_id)
         storage_record = storage_records.get(source_id)
         if rights_record is None:
@@ -117,7 +126,7 @@ def validate_source_layers(
                 if rights_record.get(field) != corpus_record.get(field):
                     errors.append(f"Source {source_id} rights and corpus {field} do not match")
 
-    return source_authors, {key: value[2] for key, value in source_records.items()}
+    return source_authors, source_records
 
 
 def validate_models_and_personas(
@@ -131,7 +140,7 @@ def validate_models_and_personas(
     dict[str, tuple[str, str]],
 ]:
     source_models: dict[str, tuple[str, str, Path]] = {}
-    for directory in project["source_author_model_directories"]:
+    for directory in project.get("source_author_model_directories", []):
         model_root = repository_root / directory
         manifest = load_json(model_root / "source-author-model-manifest.json")
         model_id = manifest["source_author_model_id"]
@@ -148,9 +157,17 @@ def validate_models_and_personas(
 
     personas: dict[str, tuple[dict[str, Any], dict[str, Any], Path]] = {}
     persona_models: dict[str, tuple[str, str]] = {}
-    for directory in project["derived_author_persona_directories"]:
+    declared_persona_paths: set[str] = set()
+    for directory in project.get("derived_author_persona_directories", []):
+        if directory in declared_persona_paths:
+            errors.append(f"Duplicate persona directory in project manifest: {directory}")
+        declared_persona_paths.add(directory)
         persona_root = repository_root / directory
-        persona_manifest = load_json(persona_root / "derived-author-persona-manifest.json")
+        manifest_path = persona_root / "derived-author-persona-manifest.json"
+        if not manifest_path.is_file():
+            errors.append(f"Declared persona directory has no manifest: {directory}")
+            continue
+        persona_manifest = load_json(manifest_path)
         persona_id = persona_manifest["derived_author_id"]
         if persona_id in personas:
             errors.append(f"Duplicate derived_author_id: {persona_id}")
@@ -177,6 +194,15 @@ def validate_models_and_personas(
         personas[persona_id] = (persona_manifest, model_manifest, persona_root)
         persona_models[model_id] = (model_manifest["model_version"], persona_id)
 
+    for manifest_path in repository_root.glob(
+        "derived-author-personas/*/derived-author-persona-manifest.json"
+    ):
+        relative_root = manifest_path.parent.relative_to(repository_root).as_posix()
+        if relative_root not in declared_persona_paths:
+            errors.append(
+                f"Persona exists but is not registered in project manifest: {relative_root}"
+            )
+
     return source_models, personas, persona_models
 
 
@@ -184,7 +210,11 @@ def validate_policies_runbooks_and_runtimes(
     repository_root: Path,
     project: dict[str, Any],
     errors: list[str],
-) -> tuple[set[str], dict[str, tuple[str, dict[str, Any]]], dict[str, tuple[str, dict[str, Any]]]]:
+) -> tuple[
+    set[str],
+    dict[str, tuple[str, dict[str, Any]]],
+    dict[str, tuple[str, dict[str, Any]]],
+]:
     policy_ids: set[str] = set()
     for rule in load_jsonl(repository_root / project["policy_rule_register"]):
         policy_id = rule["policy_rule_id"]
@@ -207,7 +237,9 @@ def validate_policies_runbooks_and_runtimes(
             errors.append(f"Runbook {runbook_id} artifacts and templates differ")
         for template_path in manifest["artifact_templates"].values():
             if not (repository_root / template_path).is_file():
-                errors.append(f"Runbook {runbook_id} references missing template {template_path}")
+                errors.append(
+                    f"Runbook {runbook_id} references missing template {template_path}"
+                )
         for policy_id in manifest["required_policy_rule_ids"]:
             if policy_id not in policy_ids:
                 errors.append(f"Runbook {runbook_id} references unknown policy {policy_id}")
@@ -221,7 +253,6 @@ def validate_policies_runbooks_and_runtimes(
         if runtime_id in runtimes:
             errors.append(f"Duplicate runtime_adapter_id: {runtime_id}")
         runtimes[runtime_id] = (configuration["configuration_version"], configuration)
-
     return policy_ids, runbooks, runtimes
 
 
@@ -240,7 +271,6 @@ def validate_work_items(
         if work_item_id in work_items:
             errors.append(f"Duplicate work_item_id: {work_item_id}")
         work_items[work_item_id] = (state, path.parent)
-
         persona_id = state["derived_author_id"]
         if persona_id not in personas:
             errors.append(f"Work item {work_item_id} references unknown persona")
@@ -278,7 +308,8 @@ def validate_work_items(
             errors.append(f"Work item {work_item_id} references unknown runtime")
         elif state["runtime_adapter_version"] != runtimes[runtime_id][0]:
             errors.append(f"Work item {work_item_id} references wrong runtime version")
-
+        if not (path.parent / "writing-runs").is_dir():
+            errors.append(f"Work item {work_item_id} has no writing-runs directory")
     return work_items
 
 
@@ -289,13 +320,25 @@ def validate_components(
 ) -> None:
     register = load_json(repository_root / project["component_status_register"])
     component_ids: set[str] = set()
+    component_paths: set[str] = set()
     for component in register["components"]:
         component_id = component["component_id"]
+        component_path = component["path"]
         if component_id in component_ids:
             errors.append(f"Duplicate component_id: {component_id}")
         component_ids.add(component_id)
-        if not (repository_root / component["path"]).exists():
-            errors.append(f"Component path does not exist: {component['path']}")
+        if component_path in component_paths and component["component_class"] != "example":
+            errors.append(f"Duplicate non-example component path: {component_path}")
+        component_paths.add(component_path)
+        if not (repository_root / component_path).exists():
+            errors.append(f"Component path does not exist: {component_path}")
+    for persona_directory in project.get("derived_author_persona_directories", []):
+        if persona_directory not in component_paths and not any(
+            path == "derived-author-personas" for path in component_paths
+        ):
+            errors.append(
+                f"Persona directory has no component registration: {persona_directory}"
+            )
 
 
 def validate_publications(
@@ -303,14 +346,16 @@ def validate_publications(
     project: dict[str, Any],
     work_items: dict[str, tuple[dict[str, Any], Path]],
     errors: list[str],
-) -> None:
+) -> list[dict[str, Any]]:
     manifest_path = (
         repository_root
         / project["approved_publications_directory"]
         / "approved-publication-manifest.jsonl"
     )
     publication_ids: set[str] = set()
+    publications: list[dict[str, Any]] = []
     for publication in load_jsonl(manifest_path):
+        publications.append(publication)
         publication_id = publication["publication_id"]
         if publication_id in publication_ids:
             errors.append(f"Duplicate publication_id: {publication_id}")
@@ -331,6 +376,81 @@ def validate_publications(
             canonical_file = publication["canonical_file"]
             if not canonical_file or not (repository_root / canonical_file).is_file():
                 errors.append(f"Publication {publication_id} has no valid canonical file")
+    return publications
+
+
+def expected_persona_indexes(
+    persona_id: str,
+    work_items: dict[str, tuple[dict[str, Any], Path]],
+    publications: list[dict[str, Any]],
+    repository_root: Path,
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    work_records: list[dict[str, Any]] = []
+    for work_item_id, (state, work_root) in work_items.items():
+        if state["derived_author_id"] == persona_id:
+            work_records.append(
+                {
+                    "derived_author_id": persona_id,
+                    "canonical_work_item_id": work_item_id,
+                    "lifecycle_status": state["lifecycle_status"],
+                    "canonical_state_file": (
+                        work_root / "work-item-state.json"
+                    ).relative_to(repository_root).as_posix(),
+                }
+            )
+    publication_records: list[dict[str, Any]] = []
+    for publication in publications:
+        if publication["derived_author_id"] == persona_id:
+            publication_records.append(
+                {
+                    "derived_author_id": persona_id,
+                    "canonical_publication_id": publication["publication_id"],
+                    "work_item_id": publication["work_item_id"],
+                    "publication_status": publication["publication_status"],
+                    "canonical_file": publication["canonical_file"],
+                }
+            )
+    return (
+        sorted(work_records, key=lambda item: item["canonical_work_item_id"]),
+        sorted(publication_records, key=lambda item: item["canonical_publication_id"]),
+    )
+
+
+def strip_sample_fields(records: Iterable[dict[str, Any]]) -> list[dict[str, Any]]:
+    return [
+        {key: value for key, value in record.items() if key != "_sample_comment"}
+        for record in records
+        if record.get("index_status") != "generated-empty"
+    ]
+
+
+def validate_persona_indexes(
+    repository_root: Path,
+    personas: dict[str, tuple[dict[str, Any], dict[str, Any], Path]],
+    work_items: dict[str, tuple[dict[str, Any], Path]],
+    publications: list[dict[str, Any]],
+    errors: list[str],
+) -> None:
+    for persona_id, (manifest, _, persona_root) in personas.items():
+        expected_work, expected_publications = expected_persona_indexes(
+            persona_id, work_items, publications, repository_root
+        )
+        work_index_path = (
+            persona_root
+            / manifest["work_items_directory"]
+            / "derived-author-work-item-index.jsonl"
+        )
+        publication_index_path = (
+            persona_root
+            / manifest["publications_directory"]
+            / "derived-author-publication-index.jsonl"
+        )
+        actual_work = strip_sample_fields(load_jsonl(work_index_path))
+        actual_publications = strip_sample_fields(load_jsonl(publication_index_path))
+        if actual_work != expected_work:
+            errors.append(f"Persona {persona_id} work-item index is stale")
+        if actual_publications != expected_publications:
+            errors.append(f"Persona {persona_id} publication index is stale")
 
 
 def validate_experiments(
@@ -341,11 +461,15 @@ def validate_experiments(
     runtimes: dict[str, tuple[str, dict[str, Any]]],
     errors: list[str],
 ) -> None:
+    experiment_ids: set[str] = set()
     for path in repository_root.glob(
         "author-model-experiments/**/experiment-manifest.json"
     ):
         experiment = load_json(path)
         experiment_id = experiment["experiment_id"]
+        if experiment_id in experiment_ids:
+            errors.append(f"Duplicate experiment_id: {experiment_id}")
+        experiment_ids.add(experiment_id)
         controlled = experiment["controlled_execution"]
         runtime_id = controlled["runtime_adapter_id"]
         runbook_id = controlled["runbook_id"]
@@ -358,21 +482,83 @@ def validate_experiments(
         elif controlled["runbook_version"] != runbooks[runbook_id][0]:
             errors.append(f"Experiment {experiment_id} references wrong runbook version")
 
-        roles = {condition["condition_role"] for condition in experiment["conditions"]}
-        missing_roles = REQUIRED_EXPERIMENT_ROLES - roles
+        roles: list[str] = []
+        condition_ids: list[str] = []
+        derived_personas: dict[str, str] = {}
+        for condition in experiment["conditions"]:
+            role = condition["condition_role"]
+            condition_id = condition["condition_id"]
+            roles.append(role)
+            condition_ids.append(condition_id)
+            persona_id = condition["persona_id"]
+            model_id = condition["author_model_id"]
+            model_version = condition["author_model_version"]
+            source_model_id = condition["source_author_model_id"]
+            source_model_version = condition["source_author_model_version"]
+            if role == "generic-runtime-baseline":
+                if any(
+                    value is not None
+                    for value in (
+                        persona_id,
+                        model_id,
+                        model_version,
+                        source_model_id,
+                        source_model_version,
+                    )
+                ):
+                    errors.append(
+                        f"Experiment {experiment_id} generic baseline loads author data"
+                    )
+            elif role == "source-model-direct-baseline":
+                if persona_id is not None or model_id not in source_models:
+                    errors.append(
+                        f"Experiment {experiment_id} has invalid source-model baseline"
+                    )
+                elif (
+                    model_version != source_models[model_id][0]
+                    or source_model_id != model_id
+                    or source_model_version != source_models[model_id][0]
+                ):
+                    errors.append(
+                        f"Experiment {experiment_id} source-model baseline version drift"
+                    )
+            elif role in {"derived-author-b", "derived-author-c"}:
+                if persona_id not in personas:
+                    errors.append(
+                        f"Experiment {experiment_id} references unknown persona {persona_id}"
+                    )
+                    continue
+                _, persona_model, _ = personas[persona_id]
+                if (
+                    model_id != persona_model["derived_author_model_id"]
+                    or model_version != persona_model["model_version"]
+                ):
+                    errors.append(
+                        f"Experiment {experiment_id} {role} model version drift"
+                    )
+                if source_model_id not in source_models:
+                    errors.append(
+                        f"Experiment {experiment_id} {role} references unknown source model"
+                    )
+                elif source_model_version != source_models[source_model_id][0]:
+                    errors.append(
+                        f"Experiment {experiment_id} {role} source-model version drift"
+                    )
+                derived_personas[role] = persona_id
+        if len(roles) != len(set(roles)):
+            errors.append(f"Experiment {experiment_id} has duplicate condition roles")
+        if len(condition_ids) != len(set(condition_ids)):
+            errors.append(f"Experiment {experiment_id} has duplicate condition IDs")
+        missing_roles = REQUIRED_EXPERIMENT_ROLES - set(roles)
         if missing_roles:
             errors.append(
                 f"Experiment {experiment_id} is missing conditions {sorted(missing_roles)}"
             )
-        for condition in experiment["conditions"]:
-            role = condition["condition_role"]
-            author_condition = condition["author_condition"]
-            if role == "generic-runtime-baseline" and author_condition is not None:
-                errors.append(f"Experiment {experiment_id} generic baseline loads an author")
-            if role == "source-model-direct-baseline" and author_condition not in source_models:
-                errors.append(f"Experiment {experiment_id} references unknown source model")
-            if role in {"derived-author-b", "derived-author-c"} and author_condition not in personas:
-                errors.append(f"Experiment {experiment_id} references unknown persona")
+        if (
+            derived_personas.get("derived-author-b")
+            == derived_personas.get("derived-author-c")
+        ):
+            errors.append(f"Experiment {experiment_id} B and C must be distinct personas")
         if not experiment["held_out_evaluation_pack_uri"].startswith(
             "evaluator-storage://"
         ):
@@ -403,15 +589,10 @@ def validate_repository_cross_references(repository_root: Path) -> list[str]:
     errors: list[str] = []
     source_authors, _ = validate_source_layers(repository_root, project, errors)
     source_models, personas, persona_models = validate_models_and_personas(
-        repository_root,
-        project,
-        source_authors,
-        errors,
+        repository_root, project, source_authors, errors
     )
     _, runbooks, runtimes = validate_policies_runbooks_and_runtimes(
-        repository_root,
-        project,
-        errors,
+        repository_root, project, errors
     )
     work_items = validate_work_items(
         repository_root,
@@ -422,7 +603,12 @@ def validate_repository_cross_references(repository_root: Path) -> list[str]:
         errors,
     )
     validate_components(repository_root, project, errors)
-    validate_publications(repository_root, project, work_items, errors)
+    publications = validate_publications(
+        repository_root, project, work_items, errors
+    )
+    validate_persona_indexes(
+        repository_root, personas, work_items, publications, errors
+    )
     validate_experiments(
         repository_root,
         source_models,
