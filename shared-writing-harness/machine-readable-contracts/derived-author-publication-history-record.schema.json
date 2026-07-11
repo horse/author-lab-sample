@@ -1,0 +1,15 @@
+{
+  "_sample_comment": "这是一个 sample，文件实质完成后删掉这行注释",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Derived Author Publication History Record",
+  "type": "object",
+  "required": ["publication_id", "work_item_id", "status", "publication_path"],
+  "properties": {
+    "_sample_comment": {"type": "string"},
+    "publication_id": {"type": ["string", "null"]},
+    "work_item_id": {"type": ["string", "null"]},
+    "status": {"type": "string", "minLength": 1},
+    "publication_path": {"type": ["string", "null"]}
+  },
+  "additionalProperties": false
+}
