@@ -1,0 +1,11 @@
+{
+  "_sample_comment": "这是一个 sample，文件实质完成后删掉这行注释",
+  "work_item_id": "{{work_item_id}}",
+  "review_status": "pending",
+  "persona_consistency": 0.0,
+  "source_trait_fidelity": 0.0,
+  "source_leakage": 0.0,
+  "originality": 0.0,
+  "cross_persona_distinction": 0.0,
+  "findings": []
+}
