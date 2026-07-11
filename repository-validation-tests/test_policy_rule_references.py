@@ -5,11 +5,11 @@ import json
 from pathlib import Path
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
-SCRIPT_PATH = REPOSITORY_ROOT / "repository-automation-scripts" / "validate_repository_cross_references.py"
+SCRIPT_PATH = REPOSITORY_ROOT / "repository-automation-scripts" / "validate_policy_rule_references.py"
 
 
 def load_script_module():
-    spec = spec_from_file_location("cross_reference_validator", SCRIPT_PATH)
+    spec = spec_from_file_location("policy_reference_validator", SCRIPT_PATH)
     assert spec and spec.loader
     module = module_from_spec(spec)
     spec.loader.exec_module(module)
@@ -18,10 +18,8 @@ def load_script_module():
 
 def test_all_policy_rule_references_resolve_in_current_repository():
     module = load_script_module()
-    policy_ids = module.load_policy_rule_ids(REPOSITORY_ROOT)
-    references = module.find_policy_rule_references(REPOSITORY_ROOT)
-    unknown = sorted({policy_id for _, policy_id in references if policy_id not in policy_ids})
-    assert unknown == []
+    errors = module.validate_policy_references(REPOSITORY_ROOT)
+    assert errors == []
 
 
 def test_unknown_policy_reference_is_detected(tmp_path):
@@ -40,12 +38,11 @@ def test_unknown_policy_reference_is_detected(tmp_path):
         + "\n",
         encoding="utf-8",
     )
+    (tmp_path / "policy.md").write_text("# Known policy\n", encoding="utf-8")
     (tmp_path / "document.md").write_text(
         "Required policy: `POLICY-UNKNOWN-999`.\n",
         encoding="utf-8",
     )
 
-    policy_ids = module.load_policy_rule_ids(tmp_path, policy_register)
-    references = module.find_policy_rule_references(tmp_path)
-    unknown = sorted({policy_id for _, policy_id in references if policy_id not in policy_ids})
-    assert unknown == ["POLICY-UNKNOWN-999"]
+    errors = module.validate_policy_references(tmp_path, policy_register)
+    assert "document.md: unknown policy rule reference POLICY-UNKNOWN-999" in errors
