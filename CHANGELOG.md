@@ -2,6 +2,31 @@
 
 <!-- 这是一个 sample，文件实质完成后删掉这行注释 -->
 
+## 2026-07-11 — Canonical template freeze and new-project bootstrap
+
+本次明确 `author-lab-sample` 的长期身份：它是 Author Lab 的 canonical reference template，不承载任何真实作者资料、研究、派生作者、运行结果、评测结果或生产出版物。
+
+### Template governance
+
+- 新增 `documentation/template-repository-governance-and-backup.md`。
+- 规定真实项目必须通过 GitHub `Use this template` 创建独立 repository，然后在新仓库转换为 `active-author-lab`。
+- 规定 sample 本身长期保持 `reference-sample`。
+- 说明 `main` Ruleset、冻结标签、外部 Git mirror 和 GitHub 平台设置备份。
+- 明确当前 canonical template 不应 archive；需要只读档案时应创建独立 archive repository。
+
+### Owner-only settings
+
+- 新增 `.github/OWNER-TEMPLATE-LOCK-CHECKLIST.md`。
+- Template repository、branch/tag rulesets、snapshot tag 与 mirror backup 只有在 GitHub UI 或受信任电脑实际执行并核验后才能勾选。
+- 文档描述目标设置不等于设置已经生效，agent 不得误报。
+
+### New-project bootstrap
+
+- 新增 `documentation/new-author-lab-project-bootstrap-prompt.md`。
+- 提供可直接复制到新 ChatGPT 对话的完整 prompt。
+- Prompt 要求 sample 只读、target repository 独立、active mode 转换、sample 数据清理、真实 source-author 骨架、仓库外材料存储、branch/PR/CI、项目 handoff 和 owner settings checklist。
+- 明确在真实材料不足时必须保留空 register 或 not-started 状态，不得编造 research、model、persona、run、evaluation 或 publication。
+
 ## 2026-07-11 — 外部审查阻塞项完整修复
 
 本次直接修复“真实实跑前完整仓库”中仍未闭合的执行合同，不建立并存的新目录或兼容旧合同。
