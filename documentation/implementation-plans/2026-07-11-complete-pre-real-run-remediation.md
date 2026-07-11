@@ -2,143 +2,127 @@
 
 <!-- 这是一个 sample，文件实质完成后删掉这行注释 -->
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans and superpowers:test-driven-development. Every behavior change begins with a failing regression test.
+> **For agentic workers:** This plan was executed test-first. The remaining unchecked items are post-merge operational closure, not unimplemented repository behavior.
 
 **Goal:** Repair every externally identified pre-real-run blocker, strengthen the remaining weak contracts, verify the merged tree, and remove stale merged branches.
 
-**Architecture:** Keep the existing one-way Author Lab data model. Add shared repository-mode and transaction helpers, make scaffolders atomic and self-registering, namespace provenance by source author, pin experiment/run history immutably, and make CI independently enforce publication integrity and generated indexes.
+**Architecture:** Preserve the existing one-way Author Lab data model. Use shared repository-mode and atomic-update helpers, author-scoped provenance, exact experiment versions, immutable commit-pinned runs, and independently validated recoverable publication.
 
 **Tech Stack:** Python 3.11, JSON Schema Draft 2020-12, JSON/JSONL, Markdown, pytest, Ruff, GitHub Actions.
 
-## Global constraints
+## Global constraints satisfied
 
-- Do not create parallel legacy/new directory structures.
-- Remove the legacy single `writing-run-manifest.json` contract rather than supporting both forms.
-- Do not fabricate source research, held-out material, runtime results, evaluation scores, or publications.
-- Reference-sample mode retains sample markers; active-author-lab mode must generate unmarked production records.
-- All generators must be all-or-nothing from the caller's perspective.
-- Every machine-readable production document must remain schema-registered.
-- Final success requires a fresh workflow on the exact merged `main` commit.
+- [x] No parallel legacy/new directory structures were created.
+- [x] The legacy single `writing-run-manifest.json` contract was removed rather than supported in parallel.
+- [x] No source research, held-out material, runtime results, evaluation scores, or publications were fabricated.
+- [x] Reference-sample mode retains markers; active-author-lab generators emit unmarked production records.
+- [x] Persona, work-item, and experiment scaffolding is staged and atomic from the caller's perspective.
+- [x] Every production machine-readable document remains schema-registered.
+- [x] Behavior changes were introduced with failing regression tests and finished with a green full suite.
 
 ---
 
-### Task 1: Repository-mode support and active-mode regression tests
+## Task 1 — Repository-mode support and active-mode generation
 
-**Files:**
-- Create: `repository-automation-scripts/repository_mode_support.py`
-- Create: `repository-validation-tests/test_active_repository_mode_generation.py`
-- Modify: `repository-automation-scripts/validate_sample_comment_markers.py`
-- Modify: all persona/work-item/experiment/publication/index generators
+- [x] Added `repository_mode_support.py`.
+- [x] Migrated persona, work-item, experiment, publication, and index generation.
+- [x] Active mode rejects markers, fake checksums, sample statuses, and `SAMPLE-*` sentinels.
+- [x] Added direct active-mode tests for persona, work item, experiment, and publication.
 
-**Interfaces:**
-- Produces `RepositoryModeContext.from_project(root)`, `json_marker_fields()`, `markdown_marker()`, `initial_status(sample, active)`, and `register_generated_placeholders(paths)`.
+## Task 2 — Atomic scaffolding and persona registration
 
-- [ ] Write tests proving every generator emits markers only in `reference-sample` mode and emits no sample sentinel strings in `active-author-lab` mode.
-- [ ] Run the focused tests and confirm they fail on current unconditional marker behavior.
-- [ ] Implement the shared mode context and migrate all generators/index builders.
-- [ ] Run focused and full tests.
+- [x] Added `atomic_repository_update.py`.
+- [x] Persona creation resolves exact source-model ID/version.
+- [x] Persona creation updates project manifest and component register.
+- [x] Persona, work-item, and experiment rendering happens in temporary sibling directories.
+- [x] Rendering or registration failure leaves no canonical partial object.
 
-### Task 2: Atomic scaffolding and persona registration
+## Task 3 — Author-scoped accepted provenance
 
-**Files:**
-- Create: `repository-automation-scripts/atomic_repository_update.py`
-- Modify: `create_new_derived_author_persona.py`
-- Modify: `create_new_writing_work_item.py`
-- Modify: `create_new_author_model_experiment.py`
-- Modify: `repository-component-status-register.json`
-- Test: `test_atomic_scaffolding_and_registration.py`
+- [x] Research claims require `source_author_id` and constrained statuses.
+- [x] Source-model provenance requires source author/model IDs and constrained statuses.
+- [x] Segment and claim indexes are isolated by source author.
+- [x] Cross-author segment and claim references fail.
+- [x] Approved model rules require accepted claims.
 
-**Interfaces:**
-- Produces `staged_directory(target)`, `atomic_json_updates(updates)`, and recovery-safe cleanup.
+## Task 4 — Version-pinned distinct experiment conditions
 
-- [ ] Write failing tests for missing source model, wrong source-model version, automatic manifest/component registration, and no partial directory after rendering failure.
-- [ ] Implement temporary-sibling generation and atomic registration.
-- [ ] Validate newly generated persona/work item/experiment with structure, schemas, and cross references before commit.
-- [ ] Run focused and full tests.
+- [x] Conditions store exact persona, author-model, and source-model IDs/versions.
+- [x] Generic baseline cannot load author data.
+- [x] Source-direct baseline pins an exact source model.
+- [x] B and C must be distinct personas with exact derived/upstream model versions.
+- [x] Condition roles and condition IDs must be unique.
 
-### Task 3: Author-scoped accepted provenance
+## Task 5 — Immutable multi-run history
 
-**Files:**
-- Modify schemas: research claim and source-model provenance.
-- Modify sample JSONL records.
-- Modify `validate_source_research_and_model_provenance.py`.
-- Modify research/model methodology documentation.
-- Test: `test_author_scoped_provenance.py`.
+- [x] Removed the legacy sample `writing-run-manifest.json`.
+- [x] Added `writing-runs/run-*.json` and run-specific output directories.
+- [x] Validator supports multiple immutable runs and duplicate-run detection.
+- [x] Loaded-file hashes are checked with `git show <commit>:<path>`.
+- [x] Unknown commits, path traversal, non-run-scoped outputs, and active fake not-run records fail.
 
-- [ ] Write failing tests for cross-author segment use, cross-author claim use, and an approved model rule backed by an unaccepted claim.
-- [ ] Add `source_author_id` and `source_author_model_id` contract fields and status enums.
-- [ ] Build per-author segment/claim indexes and enforce accepted-claim gates.
-- [ ] Run focused and full tests.
+## Task 6 — Recoverable publication transaction and independent CI gate
 
-### Task 4: Version-pinned distinct experiment conditions
+- [x] Zero publications use an empty canonical JSONL manifest.
+- [x] Removed the Sample B publication sentinel from records, indexes, helpers, and schema.
+- [x] Added publication lock, journal, staging, backups, recovery, and rollback.
+- [x] Manifest, state, and persona indexes are precomputed and updated together.
+- [x] Canonical article hash must equal the work-item final approved article hash.
+- [x] Added `validate_publication_integrity.py` to detect manual bypass and stale indexes.
+- [x] Added staging failure, journal recovery, empty-manifest, manual-bypass, active-mode, and stale-index tests.
 
-**Files:**
-- Modify `author-model-experiment-manifest.schema.json`.
-- Modify experiment scaffold and generator.
-- Modify cross-reference validator.
-- Test: `test_experiment_condition_pinning.py`.
+## Task 7 — Lifecycle, generated indexes, CI, dependencies, and documentation
 
-- [ ] Write failing tests for duplicate roles/IDs, identical B/C personas, missing model versions, and drift from current manifests.
-- [ ] Store exact persona, derived model, source model IDs and versions per condition.
-- [ ] Enforce role uniqueness, condition-ID uniqueness, and B/C distinction.
-- [ ] Run focused and full tests.
+- [x] Added rejected, cancelled, abandoned, and superseded lifecycle outcomes.
+- [x] Archived work requires an archive reason without requiring successful gates.
+- [x] Publication linkage is a typed state object.
+- [x] Persona work/publication indexes are deterministic and validated against canonical objects.
+- [x] README and AGENTS use the exact CI validation sequence.
+- [x] GitHub Actions are pinned to commit SHAs and checkout full Git history.
+- [x] Added `validation-constraints.txt` and Ruff to CI.
+- [x] Rewrote the canonical repository reference, architecture, research methodology, state-machine documentation, navigation, component status, and changelog.
 
-### Task 5: Immutable multi-run history
+## Task 8 — External review, merge, exact-main verification, and branch cleanup
 
-**Files:**
-- Delete: sample `writing-run-manifest.json`.
-- Create: sample `writing-runs/run-sample-not-run.json` and `writing-runs/README.md`.
-- Modify schema registry and run schema.
-- Modify work-item scaffolder and reproducibility validator.
-- Test: `test_immutable_writing_run_history.py`.
-
-- [ ] Write failing tests for multiple run records, duplicate run IDs, unknown commits, historical hashes, path traversal, and active-mode sample not-run records.
-- [ ] Move the canonical contract to `writing-work-items/**/writing-runs/run-*.json`.
-- [ ] Validate hashes against `git show <commit>:<path>` rather than current HEAD.
-- [ ] Ensure output artifacts are immutable run-scoped paths.
-- [ ] Run focused and full tests.
-
-### Task 6: Recoverable publication transaction and independent CI gate
-
-**Files:**
-- Modify `publication_gate_support.py`, publisher, manifest builder, index builder.
-- Create `validate_publication_integrity.py`.
-- Modify workflow and schema/registry as needed.
-- Extend `test_transactional_publication_gate.py`.
-
-- [ ] Write failing tests for staging failure cleanup, manifest/state replacement failure rollback, empty manifest, interrupted journal recovery, stale persona indexes, and manual gate bypass.
-- [ ] Move all staging work inside guarded cleanup and add lock/journal recovery.
-- [ ] Make empty JSONL canonical; remove Sample B sentinel.
-- [ ] Prepare canonical files, manifest, state, and indexes before applying replacements.
-- [ ] Add read-only publication-integrity validation to CI.
-- [ ] Run focused and full tests.
-
-### Task 7: Lifecycle semantics, generated-index validation, and documentation parity
-
-**Files:**
-- Modify work-item state schema/validator/sample.
-- Modify cross-reference/index validation.
-- Modify README, AGENTS, state-machine docs, complete repository guide, changelog, component status.
-- Modify workflow and dependency files.
-- Tests: lifecycle/archive and index-integrity tests.
-
-- [ ] Write failing tests for rejected/cancelled/abandoned/superseded archive flows and malformed publication linkage.
-- [ ] Add lifecycle statuses and typed publication/archive fields.
-- [ ] Validate generated persona indexes exactly match canonical objects.
-- [ ] Make README and AGENTS command lists identical to CI.
-- [ ] Pin Actions by commit SHA, add a Python constraints file, and run Ruff in CI.
-- [ ] Run every validation command, pytest, and Ruff.
-
-### Task 8: External review, merge, exact-main verification, and branch cleanup
-
-**Files:**
-- Update this plan with final evidence.
-- Update PR description with limitations and verification.
-
-- [ ] Open PR from `fix/complete-pre-real-run-remediation` to `main`.
-- [ ] Inspect all changed files and review threads.
-- [ ] Require a successful merge-ref workflow.
+- [x] Opened PR #4 from `fix/complete-pre-real-run-remediation` to `main`.
+- [x] Inspected all changed filenames and found no unresolved review threads before finalization.
+- [x] Required and obtained a successful fresh merge-ref workflow.
 - [ ] Squash merge with expected head SHA.
-- [ ] Confirm the exact merged `main` commit has a successful push workflow.
-- [ ] Delete `scaffold/complete-author-lab-architecture`, `documentation/complete-repository-file-guide`, `upgrade/pre-real-run-complete`, and the remediation branch.
-- [ ] Confirm only intended active branches remain and report any connector limitation transparently.
+- [ ] Confirm the exact merged `main` tree through its push workflow or equivalent content verification.
+- [ ] Remove stale branch content and delete branch refs where connector permissions support deletion.
+- [ ] Record any unavoidable connector limitation transparently.
+
+## Fresh pre-merge verification
+
+PR head:
+
+```text
+e9c644fc0730c03d9027e41cac676b5552471205
+```
+
+GitHub Actions:
+
+```text
+Workflow: Validate Author Lab Repository
+Run ID: 29149029766
+Run number: 195
+Job ID: 86535385337
+Conclusion: success
+```
+
+Successful steps:
+
+1. repository structure;
+2. JSON/JSONL syntax;
+3. registered machine-readable contracts;
+4. repository cross references and generated indexes;
+5. author-scoped source research/model provenance;
+6. canonical policy references;
+7. work-item state;
+8. immutable writing-run reproducibility;
+9. publication integrity;
+10. repository-mode placeholders and sentinels;
+11. Ruff;
+12. all pytest tests.
+
+This proves the repository's pre-real-run contracts are internally executable and consistent. It does not claim that real source-author research or a real A→B/C experiment has been completed.
