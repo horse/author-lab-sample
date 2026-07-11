@@ -3,16 +3,89 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Writing Run Manifest",
   "type": "object",
-  "required": ["run_id", "work_item_id", "runtime_adapter_id", "model_identifier", "started_at"],
+  "required": [
+    "run_id",
+    "run_status",
+    "work_item_id",
+    "repository_commit_sha",
+    "derived_author_model_id",
+    "derived_author_model_version",
+    "runbook_id",
+    "runbook_version",
+    "runtime_adapter_id",
+    "runtime_adapter_version",
+    "model_identifier",
+    "model_parameters",
+    "context_budget_tokens",
+    "tool_permissions",
+    "started_at",
+    "completed_at",
+    "loaded_file_records",
+    "output_artifacts",
+    "exit_status"
+  ],
   "properties": {
     "_sample_comment": {"type": "string"},
-    "run_id": {"type": "string"},
+    "run_id": {"type": "string", "minLength": 1},
+    "run_status": {"enum": ["not-run", "running", "completed", "failed", "cancelled"]},
     "work_item_id": {"type": "string"},
+    "repository_commit_sha": {"type": ["string", "null"], "pattern": "^[a-f0-9]{40}$"},
+    "derived_author_model_id": {"type": "string"},
+    "derived_author_model_version": {"type": "string"},
+    "runbook_id": {"type": "string"},
+    "runbook_version": {"type": "string"},
     "runtime_adapter_id": {"type": "string"},
-    "model_identifier": {"type": "string"},
-    "started_at": {"type": "string", "format": "date-time"},
+    "runtime_adapter_version": {"type": "string"},
+    "model_identifier": {"type": ["string", "null"]},
+    "model_parameters": {"type": "object"},
+    "context_budget_tokens": {"type": ["integer", "null"], "minimum": 1},
+    "tool_permissions": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "started_at": {"type": ["string", "null"], "format": "date-time"},
     "completed_at": {"type": ["string", "null"], "format": "date-time"},
-    "loaded_files": {"type": "array", "items": {"type": "string"}}
+    "loaded_file_records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["path", "sha256"],
+        "properties": {
+          "path": {"type": "string", "minLength": 1},
+          "sha256": {"type": ["string", "null"], "pattern": "^[a-f0-9]{64}$"}
+        },
+        "additionalProperties": false
+      }
+    },
+    "output_artifacts": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "exit_status": {"type": ["integer", "null"]}
   },
-  "additionalProperties": true
+  "allOf": [
+    {
+      "if": {
+        "properties": {"run_status": {"enum": ["completed", "failed", "cancelled"]}},
+        "required": ["run_status"]
+      },
+      "then": {
+        "properties": {
+          "repository_commit_sha": {"type": "string", "pattern": "^[a-f0-9]{40}$"},
+          "model_identifier": {"type": "string", "minLength": 1},
+          "started_at": {"type": "string", "format": "date-time"},
+          "completed_at": {"type": "string", "format": "date-time"},
+          "exit_status": {"type": "integer"},
+          "loaded_file_records": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": ["path", "sha256"],
+              "properties": {
+                "path": {"type": "string", "minLength": 1},
+                "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+              },
+              "additionalProperties": false
+            }
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
 }
