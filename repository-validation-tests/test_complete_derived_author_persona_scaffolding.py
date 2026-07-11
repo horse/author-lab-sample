@@ -43,8 +43,24 @@ def prepare_repository(root: Path) -> list[str]:
     write_json(
         root / "author-lab-project-manifest.json",
         {
+            "repository_mode": "reference-sample",
             "default_language": "zh-Hans",
+            "source_author_model_directories": ["source-author-models/source-author-test-model"],
+            "derived_author_persona_directories": [],
+            "component_status_register": "repository-component-status-register.json",
             "persona_scaffold_template_manifest": "shared-writing-harness/scaffold-templates/derived-author-persona-template/template-manifest.json",
+        },
+    )
+    write_json(
+        root / "repository-component-status-register.json",
+        {"_sample_comment": SAMPLE_MARKER, "schema_version": "1.0.0", "components": []},
+    )
+    write_json(
+        root / "source-author-models/source-author-test-model/source-author-model-manifest.json",
+        {
+            "source_author_model_id": "source-author-test-model",
+            "source_author_id": "source-author-test",
+            "model_version": "1.0.0",
         },
     )
     write_json(
@@ -94,11 +110,13 @@ def test_persona_scaffolder_renders_every_template_required_path(tmp_path):
     manifest = json.loads((persona_root / "derived-author-persona-manifest.json").read_text(encoding="utf-8"))
     lineage = json.loads((persona_root / "derived-author-lineage.json").read_text(encoding="utf-8"))
     model = json.loads((persona_root / "derived-author-model/derived-author-model-manifest.json").read_text(encoding="utf-8"))
+    project = json.loads((tmp_path / "author-lab-project-manifest.json").read_text(encoding="utf-8"))
     assert manifest["derived_author_id"] == "derived-author-test-b"
     assert manifest["primary_language"] == "zh-Hans"
     assert lineage["source_models"][0]["source_author_model_id"] == "source-author-test-model"
     assert lineage["may_claim_source_author_identity"] is False
     assert model["derived_author_model_id"] == "derived-author-test-b-model"
+    assert "derived-author-personas/derived-author-test-b" in project["derived_author_persona_directories"]
     assert (persona_root / "derived-author-model/VERSION").read_text(encoding="utf-8").endswith("0.1.0\n")
 
 
