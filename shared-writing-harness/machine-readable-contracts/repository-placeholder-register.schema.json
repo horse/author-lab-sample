@@ -1,0 +1,17 @@
+{
+  "_sample_comment": "这是一个 sample，文件实质完成后删掉这行注释",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Repository Placeholder Register",
+  "type": "object",
+  "required": ["schema_version", "repository_mode", "placeholder_policy", "registered_placeholder_paths", "active_author_lab_policy", "ignored_generated_path_patterns"],
+  "properties": {
+    "_sample_comment": {"type": "string"},
+    "schema_version": {"type": "string"},
+    "repository_mode": {"enum": ["reference-sample", "active-author-lab"]},
+    "placeholder_policy": {"enum": ["all-managed-text-files", "registered-placeholder-paths-only"]},
+    "registered_placeholder_paths": {"type": "array", "items": {"type": "string"}},
+    "active_author_lab_policy": {"const": "registered-placeholder-paths-only"},
+    "ignored_generated_path_patterns": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": false
+}
