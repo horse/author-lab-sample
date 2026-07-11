@@ -6,6 +6,7 @@ from pathlib import Path
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 SCRIPT_PATH = REPOSITORY_ROOT / "repository-automation-scripts/create_new_author_model_experiment.py"
+SAMPLE_MARKER = "这是一个 sample，文件实质完成后删掉这行注释"
 
 
 def load_module():
@@ -99,6 +100,12 @@ def test_experiment_conditions_pin_exact_model_ids_and_versions(tmp_path):
     assert by_role["derived-author-b"]["source_author_model_version"] == "2.0.0"
     assert by_role["derived-author-c"]["author_model_id"] == "derived-c-model"
     assert by_role["derived-author-c"]["author_model_version"] == "3.4.0"
+    for path in experiment_root.rglob("*"):
+        if path.is_file():
+            text = path.read_text(encoding="utf-8")
+            assert SAMPLE_MARKER not in text
+            assert "SAMPLE-NOT-RUN" not in text
+    assert (experiment_root / "raw-evaluation-results.jsonl").read_text(encoding="utf-8") == ""
 
 
 def test_experiment_rejects_same_persona_for_b_and_c(tmp_path):
