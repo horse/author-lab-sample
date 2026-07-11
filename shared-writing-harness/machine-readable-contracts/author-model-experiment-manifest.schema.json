@@ -1,0 +1,37 @@
+{
+  "_sample_comment": "这是一个 sample，文件实质完成后删掉这行注释",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Author Model Experiment Manifest",
+  "type": "object",
+  "required": ["experiment_id", "experiment_status", "hypothesis_file", "controlled_input_directory", "conditions", "held_out_evaluation_pack_uri", "runtime_run_records_directory", "raw_evaluation_results_file", "aggregate_analysis_file", "failure_cases_directory", "conclusion_file"],
+  "properties": {
+    "_sample_comment": {"type": "string"},
+    "experiment_id": {"type": "string", "pattern": "^experiment-[0-9]{4}-[0-9]{3}-[a-z0-9]+(?:-[a-z0-9]+)*$"},
+    "experiment_status": {"enum": ["designed", "ready-to-run", "running", "evaluating", "completed", "cancelled"]},
+    "hypothesis_file": {"type": "string"},
+    "controlled_input_directory": {"type": "string"},
+    "conditions": {
+      "type": "array",
+      "minItems": 4,
+      "items": {
+        "type": "object",
+        "required": ["condition_id", "condition_role", "author_condition", "runtime_adapter_id", "runbook_id"],
+        "properties": {
+          "condition_id": {"type": "string"},
+          "condition_role": {"enum": ["generic-runtime-baseline", "source-model-direct-baseline", "derived-author-b", "derived-author-c", "additional-controlled-condition"]},
+          "author_condition": {"type": ["string", "null"]},
+          "runtime_adapter_id": {"type": "string"},
+          "runbook_id": {"type": "string"}
+        },
+        "additionalProperties": false
+      }
+    },
+    "held_out_evaluation_pack_uri": {"type": "string", "pattern": "^evaluator-storage://"},
+    "runtime_run_records_directory": {"type": "string"},
+    "raw_evaluation_results_file": {"type": "string"},
+    "aggregate_analysis_file": {"type": "string"},
+    "failure_cases_directory": {"type": "string"},
+    "conclusion_file": {"type": "string"}
+  },
+  "additionalProperties": false
+}
