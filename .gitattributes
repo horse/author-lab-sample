@@ -1,0 +1,11 @@
+# 这是一个 sample，文件实质完成后删掉这行注释
+
+* text=auto eol=lf
+*.epub binary
+*.pdf binary
+*.jpg binary
+*.jpeg binary
+*.png binary
+*.webp binary
+*.mp3 binary
+*.mp4 binary

@@ -1,0 +1,10 @@
+{
+  "_sample_comment": "这是一个 sample，文件实质完成后删掉这行注释",
+  "runtime_adapter_id": "local-command-line-runtime-adapter",
+  "runtime_type": "local-command-line",
+  "configuration_version": "0.1.0",
+  "default_model_identifier": null,
+  "context_window_tokens": null,
+  "tool_capabilities": ["filesystem", "shell", "local-model"],
+  "required_environment_variables": ["AUTHOR_LAB_MODEL_ENDPOINT"]
+}

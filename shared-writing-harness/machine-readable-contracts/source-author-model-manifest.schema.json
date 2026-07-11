@@ -1,0 +1,16 @@
+{
+  "_sample_comment": "这是一个 sample，文件实质完成后删掉这行注释",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Source Author Model Manifest",
+  "type": "object",
+  "required": ["source_author_model_id", "source_author_id", "model_version", "provenance_register"],
+  "properties": {
+    "_sample_comment": {"type": "string"},
+    "source_author_model_id": {"type": "string"},
+    "source_author_id": {"type": "string"},
+    "model_version": {"type": "string"},
+    "status": {"type": "string"},
+    "provenance_register": {"type": "string"}
+  },
+  "additionalProperties": true
+}

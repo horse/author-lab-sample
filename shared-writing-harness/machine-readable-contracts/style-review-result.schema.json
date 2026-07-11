@@ -1,0 +1,19 @@
+{
+  "_sample_comment": "这是一个 sample，文件实质完成后删掉这行注释",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Style Review Result",
+  "type": "object",
+  "required": ["work_item_id", "review_status", "persona_consistency", "source_leakage", "originality"],
+  "properties": {
+    "_sample_comment": {"type": "string"},
+    "work_item_id": {"type": "string"},
+    "review_status": {"enum": ["pending", "passed", "failed"]},
+    "persona_consistency": {"type": "number", "minimum": 0, "maximum": 1},
+    "source_trait_fidelity": {"type": "number", "minimum": 0, "maximum": 1},
+    "source_leakage": {"type": "number", "minimum": 0, "maximum": 1},
+    "originality": {"type": "number", "minimum": 0, "maximum": 1},
+    "cross_persona_distinction": {"type": "number", "minimum": 0, "maximum": 1},
+    "findings": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": true
+}

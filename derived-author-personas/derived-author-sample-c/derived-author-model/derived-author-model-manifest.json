@@ -1,0 +1,11 @@
+{
+  "_sample_comment": "这是一个 sample，文件实质完成后删掉这行注释",
+  "schema_version": "1.0.0",
+  "derived_author_model_id": "derived-author-sample-c-model",
+  "derived_author_id": "derived-author-sample-c",
+  "model_version": "0.1.0",
+  "status": "sample-unreviewed",
+  "core_model_directory": "core-derived-author-model",
+  "genre_modes_directory": "genre-specific-writing-modes",
+  "loading_map": "derived-author-model-loading-map.json"
+}

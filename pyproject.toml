@@ -1,0 +1,22 @@
+# 这是一个 sample，文件实质完成后删掉这行注释
+
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "author-lab-sample-tools"
+version = "0.1.0"
+description = "Validation and scaffolding tools for the author-lab-sample repository"
+requires-python = ">=3.11"
+dependencies = ["jsonschema>=4.23"]
+
+[project.optional-dependencies]
+development = ["pytest>=8.2", "ruff>=0.5"]
+
+[tool.pytest.ini_options]
+testpaths = ["repository-validation-tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"

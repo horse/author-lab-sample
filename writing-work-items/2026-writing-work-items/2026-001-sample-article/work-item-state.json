@@ -1,0 +1,15 @@
+{
+  "_sample_comment": "这是一个 sample，文件实质完成后删掉这行注释",
+  "work_item_id": "2026-001-sample-article",
+  "derived_author_id": "derived-author-sample-b",
+  "status": "editor-review",
+  "author_model_version": "0.1.0",
+  "runbook_id": "standard-researched-essay",
+  "runtime_adapter_id": "chatgpt-runtime-adapter",
+  "reviews": {
+    "factual_review": "passed",
+    "style_review": "passed",
+    "editor_review": "pending"
+  },
+  "publication": null
+}

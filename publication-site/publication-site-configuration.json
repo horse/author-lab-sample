@@ -1,0 +1,8 @@
+{
+  "_sample_comment": "这是一个 sample，文件实质完成后删掉这行注释",
+  "site_id": "author-lab-sample-publication-site",
+  "site_generator": null,
+  "canonical_publication_directory": "../approved-publications",
+  "generated_output_directory": "../generated-site-output",
+  "include_publication_statuses": ["published"]
+}

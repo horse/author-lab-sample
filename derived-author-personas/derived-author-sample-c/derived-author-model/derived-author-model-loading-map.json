@@ -1,0 +1,15 @@
+{
+  "_sample_comment": "这是一个 sample，文件实质完成后删掉这行注释",
+  "default_core": [
+    "core-derived-author-model/derived-author-identity-and-public-role.md",
+    "core-derived-author-model/recurring-concerns-and-topic-boundaries.md",
+    "core-derived-author-model/reasoning-patterns-and-problem-framing.md",
+    "core-derived-author-model/voice-and-writing-style-fingerprint.md",
+    "core-derived-author-model/authorial-and-ethical-boundaries.md"
+  ],
+  "genre_modes": {
+    "essay": "genre-specific-writing-modes/cultural-essay-writing-mode.md",
+    "short-commentary": "genre-specific-writing-modes/short-cultural-commentary-writing-mode.md",
+    "diary": "genre-specific-writing-modes/diary-and-life-writing-mode.md"
+  }
+}

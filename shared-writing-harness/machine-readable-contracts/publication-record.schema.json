@@ -1,0 +1,18 @@
+{
+  "_sample_comment": "这是一个 sample，文件实质完成后删掉这行注释",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Publication Record",
+  "type": "object",
+  "required": ["publication_id", "work_item_id", "derived_author_id", "title", "publication_status"],
+  "properties": {
+    "_sample_comment": {"type": "string"},
+    "publication_id": {"type": "string"},
+    "work_item_id": {"type": "string"},
+    "derived_author_id": {"type": "string"},
+    "title": {"type": "string"},
+    "publication_status": {"enum": ["approved", "published", "withdrawn"]},
+    "canonical_file": {"type": "string"},
+    "published_at": {"type": ["string", "null"], "format": "date-time"}
+  },
+  "additionalProperties": true
+}

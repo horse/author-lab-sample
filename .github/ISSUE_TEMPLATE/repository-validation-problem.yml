@@ -1,0 +1,20 @@
+# 这是一个 sample，文件实质完成后删掉这行注释
+
+name: Repository validation problem
+description: Report a schema, state-machine, automation, or repository-structure failure.
+title: "validation-problem: "
+labels: [validation]
+body:
+  - type: textarea
+    id: command
+    attributes:
+      label: Command and complete output
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true

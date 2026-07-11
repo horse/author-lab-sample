@@ -1,0 +1,26 @@
+# 这是一个 sample，文件实质完成后删掉这行注释
+
+name: Source-author research claim
+description: Propose or revise an evidence-backed claim about a source author.
+title: "research-claim: "
+labels: [research]
+body:
+  - type: textarea
+    id: claim
+    attributes:
+      label: Proposed claim
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Supporting and counterexample evidence identifiers
+    validations:
+      required: true
+  - type: dropdown
+    id: confidence
+    attributes:
+      label: Proposed confidence band
+      options: [high, medium, provisional]
+    validations:
+      required: true

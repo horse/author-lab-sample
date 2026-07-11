@@ -1,0 +1,18 @@
+{
+  "_sample_comment": "这是一个 sample，文件实质完成后删掉这行注释",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Writing Run Manifest",
+  "type": "object",
+  "required": ["run_id", "work_item_id", "runtime_adapter_id", "model_identifier", "started_at"],
+  "properties": {
+    "_sample_comment": {"type": "string"},
+    "run_id": {"type": "string"},
+    "work_item_id": {"type": "string"},
+    "runtime_adapter_id": {"type": "string"},
+    "model_identifier": {"type": "string"},
+    "started_at": {"type": "string", "format": "date-time"},
+    "completed_at": {"type": ["string", "null"], "format": "date-time"},
+    "loaded_files": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": true
+}

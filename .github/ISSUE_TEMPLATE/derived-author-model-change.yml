@@ -1,0 +1,25 @@
+# 这是一个 sample，文件实质完成后删掉这行注释
+
+name: Derived-author model change
+description: Propose a change to a derived author's identity, lineage, model, or boundaries.
+title: "derived-author-change: "
+labels: [derived-author]
+body:
+  - type: input
+    id: derived_author_id
+    attributes:
+      label: Derived-author identifier
+    validations:
+      required: true
+  - type: textarea
+    id: change
+    attributes:
+      label: Proposed change
+    validations:
+      required: true
+  - type: textarea
+    id: derivation_impact
+    attributes:
+      label: Inheritance, transformation, rejection, and originality impact
+    validations:
+      required: true

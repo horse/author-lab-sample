@@ -1,0 +1,19 @@
+# 这是一个 sample，文件实质完成后删掉这行注释
+
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+.env
+.env.*
+.DS_Store
+build/
+dist/
+*.egg-info/
+local-source-materials/
+private-source-materials/
+runtime-secrets/
+generated-site-output/

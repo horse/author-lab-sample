@@ -1,0 +1,13 @@
+{
+  "_sample_comment": "这是一个 sample，文件实质完成后删掉这行注释",
+  "schema_version": "1.0.0",
+  "source_author_model_id": "source-author-sample-model",
+  "source_author_id": "source-author-sample",
+  "model_version": "0.1.0",
+  "status": "sample-unreviewed",
+  "core_directory": "core-author-model",
+  "genre_modes_directory": "genre-specific-author-modes",
+  "period_overlays_directory": "period-specific-author-overlays",
+  "load_map": "author-model-loading-map.json",
+  "provenance_register": "source-author-model-provenance-register.jsonl"
+}

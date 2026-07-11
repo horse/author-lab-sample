@@ -1,0 +1,21 @@
+{
+  "_sample_comment": "这是一个 sample，文件实质完成后删掉这行注释",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Source Corpus Record",
+  "type": "object",
+  "required": ["source_id", "source_type", "title", "rights_status"],
+  "properties": {
+    "_sample_comment": {"type": "string"},
+    "source_id": {"type": "string", "pattern": "^SOURCE-"},
+    "source_type": {"enum": ["book", "essay", "interview", "letter", "diary", "speech", "social-media", "secondary-source"]},
+    "title": {"type": "string"},
+    "creator": {"type": "string"},
+    "year": {"type": ["integer", "null"]},
+    "language": {"type": "string"},
+    "original_file": {"type": ["string", "null"]},
+    "normalized_text": {"type": ["string", "null"]},
+    "rights_status": {"type": "string"},
+    "sha256": {"type": ["string", "null"]}
+  },
+  "additionalProperties": true
+}

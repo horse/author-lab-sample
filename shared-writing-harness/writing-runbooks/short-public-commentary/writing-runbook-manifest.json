@@ -1,0 +1,8 @@
+{
+  "_sample_comment": "这是一个 sample，文件实质完成后删掉这行注释",
+  "runbook_id": "short-public-commentary",
+  "runbook_version": "1.0.0",
+  "required_stages": ["intake", "research", "planning", "drafting", "factual-review", "style-review", "editor-review"],
+  "optional_stages": ["publication-preparation"],
+  "required_artifacts": ["brief.md", "research-pack.md", "article-plan.md", "draft-01.md", "factual-review-result.json", "style-review-result.json", "editor-review.md"]
+}

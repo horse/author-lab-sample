@@ -1,0 +1,17 @@
+{
+  "_sample_comment": "这是一个 sample，文件实质完成后删掉这行注释",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Author Model Evaluation Result",
+  "type": "object",
+  "required": ["evaluation_id", "derived_author_id", "evaluation_type", "score"],
+  "properties": {
+    "_sample_comment": {"type": "string"},
+    "evaluation_id": {"type": "string"},
+    "derived_author_id": {"type": "string"},
+    "evaluation_type": {"enum": ["source-trait-fidelity", "persona-consistency", "source-leakage", "originality", "cross-persona-distinction", "factuality"]},
+    "score": {"type": "number", "minimum": 0, "maximum": 1},
+    "evaluator": {"type": "string"},
+    "notes": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": true
+}

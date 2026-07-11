@@ -1,0 +1,18 @@
+{
+  "_sample_comment": "这是一个 sample，文件实质完成后删掉这行注释",
+  "default_core": [
+    "core-author-model/recurring-concerns.md",
+    "core-author-model/reasoning-patterns.md",
+    "core-author-model/voice-and-register.md",
+    "core-author-model/writing-style-fingerprint.md",
+    "core-author-model/authorial-boundaries.md"
+  ],
+  "genre_modes": {
+    "essay": "genre-specific-author-modes/essay-writing-mode.md",
+    "column": "genre-specific-author-modes/column-writing-mode.md",
+    "criticism": "genre-specific-author-modes/criticism-writing-mode.md",
+    "diary": "genre-specific-author-modes/diary-writing-mode.md",
+    "letter": "genre-specific-author-modes/letter-writing-mode.md",
+    "short-post": "genre-specific-author-modes/short-post-writing-mode.md"
+  }
+}
