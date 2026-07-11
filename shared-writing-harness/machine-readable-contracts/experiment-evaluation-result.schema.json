@@ -1,0 +1,18 @@
+{
+  "_sample_comment": "这是一个 sample，文件实质完成后删掉这行注释",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Experiment Evaluation Result",
+  "type": "object",
+  "required": ["evaluation_result_id", "experiment_id", "condition_blind_code", "evaluator_id", "status", "scores", "notes"],
+  "properties": {
+    "_sample_comment": {"type": "string"},
+    "evaluation_result_id": {"type": "string"},
+    "experiment_id": {"type": "string", "pattern": "^experiment-"},
+    "condition_blind_code": {"type": "string"},
+    "evaluator_id": {"type": "string"},
+    "status": {"enum": ["not-run", "completed", "excluded"]},
+    "scores": {"type": "object", "additionalProperties": {"type": "number"}},
+    "notes": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": false
+}

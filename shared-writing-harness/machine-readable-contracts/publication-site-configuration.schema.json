@@ -1,0 +1,16 @@
+{
+  "_sample_comment": "这是一个 sample，文件实质完成后删掉这行注释",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Publication Site Configuration",
+  "type": "object",
+  "required": ["site_id", "site_generator", "canonical_publication_directory", "generated_output_directory", "include_publication_statuses"],
+  "properties": {
+    "_sample_comment": {"type": "string"},
+    "site_id": {"type": "string", "minLength": 1},
+    "site_generator": {"type": ["string", "null"]},
+    "canonical_publication_directory": {"type": "string", "minLength": 1},
+    "generated_output_directory": {"type": "string", "minLength": 1},
+    "include_publication_statuses": {"type": "array", "items": {"enum": ["approved", "published", "withdrawn"]}, "uniqueItems": true}
+  },
+  "additionalProperties": false
+}

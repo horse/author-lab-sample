@@ -3,30 +3,35 @@
 
 from __future__ import annotations
 
-import json
+import os
 from pathlib import Path
 
-SAMPLE_MARKER = "这是一个 sample，文件实质完成后删掉这行注释"
+from publication_gate_support import (
+    collect_publication_records,
+    load_json,
+    serialize_publication_manifest,
+)
 
 
 def main() -> int:
     repository_root = Path(__file__).resolve().parents[1]
-    publications_root = repository_root / "approved-publications"
-    records: list[dict] = []
-    for metadata_path in publications_root.rglob("publication-metadata.json"):
-        with metadata_path.open("r", encoding="utf-8") as handle:
-            record = json.load(handle)
-        if record.get("publication_status") not in {"approved", "published", "withdrawn"}:
-            raise SystemExit(f"Invalid publication status in {metadata_path}")
-        records.append(record)
+    project = load_json(repository_root / "author-lab-project-manifest.json")
+    publications_directory = project["approved_publications_directory"]
+    publications_root = repository_root / publications_directory
+    records = collect_publication_records(repository_root, publications_directory)
 
     manifest_path = publications_root / "approved-publication-manifest.jsonl"
-    if records:
-        lines = [json.dumps(record, ensure_ascii=False, sort_keys=True) for record in sorted(records, key=lambda item: item["publication_id"])]
-    else:
-        lines = [json.dumps({"_sample_comment": SAMPLE_MARKER, "publication_id": "SAMPLE-NOT-PUBLISHED", "publication_status": "withdrawn"}, ensure_ascii=False)]
-    manifest_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
-    print(f"Wrote {len(lines)} publication manifest record(s) to {manifest_path}")
+    manifest_path.parent.mkdir(parents=True, exist_ok=True)
+    temporary_path = manifest_path.with_suffix(".jsonl.tmp")
+    temporary_path.write_text(
+        serialize_publication_manifest(records),
+        encoding="utf-8",
+    )
+    os.replace(temporary_path, manifest_path)
+    print(
+        f"Validated and wrote {max(len(records), 1)} publication manifest record(s) "
+        f"to {manifest_path}"
+    )
     return 0
 
 

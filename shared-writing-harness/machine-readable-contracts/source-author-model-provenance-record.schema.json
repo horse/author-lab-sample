@@ -1,0 +1,15 @@
+{
+  "_sample_comment": "这是一个 sample，文件实质完成后删掉这行注释",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Source Author Model Provenance Record",
+  "type": "object",
+  "required": ["model_rule_id", "research_claim_ids", "model_file", "status"],
+  "properties": {
+    "_sample_comment": {"type": "string"},
+    "model_rule_id": {"type": "string", "pattern": "^SOURCE-MODEL-RULE-[0-9]{4,}$"},
+    "research_claim_ids": {"type": "array", "minItems": 1, "items": {"type": "string", "pattern": "^RESEARCH-CLAIM-[0-9]{4,}$"}, "uniqueItems": true},
+    "model_file": {"type": "string", "minLength": 1},
+    "status": {"type": "string", "minLength": 1}
+  },
+  "additionalProperties": false
+}

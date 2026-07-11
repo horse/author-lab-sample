@@ -1,0 +1,42 @@
+{
+  "_sample_comment": "这是一个 sample，文件实质完成后删掉这行注释",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Derived Author Persona Template Manifest",
+  "type": "object",
+  "required": ["schema_version", "template_id", "required_directories", "required_paths", "markdown_files", "default_genre_modes"],
+  "properties": {
+    "_sample_comment": {"type": "string"},
+    "schema_version": {"type": "string"},
+    "template_id": {"type": "string", "minLength": 1},
+    "required_directories": {"type": "array", "minItems": 1, "items": {"type": "string"}, "uniqueItems": true},
+    "required_paths": {"type": "array", "minItems": 1, "items": {"type": "string"}, "uniqueItems": true},
+    "markdown_files": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["path", "title", "purpose"],
+        "properties": {
+          "path": {"type": "string"},
+          "title": {"type": "string"},
+          "purpose": {"type": "string"}
+        },
+        "additionalProperties": false
+      }
+    },
+    "default_genre_modes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["path", "title"],
+        "properties": {
+          "path": {"type": "string"},
+          "title": {"type": "string"}
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

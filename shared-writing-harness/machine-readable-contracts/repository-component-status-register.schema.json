@@ -12,14 +12,25 @@
       "minItems": 1,
       "items": {
         "type": "object",
-        "required": ["component_id", "path", "component_class", "implementation_status", "validation_status", "production_ready"],
+        "required": [
+          "component_id",
+          "path",
+          "component_class",
+          "implementation_status",
+          "validation_status",
+          "production_ready",
+          "real_content_status",
+          "experimentally_validated"
+        ],
         "properties": {
           "component_id": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
           "path": {"type": "string", "minLength": 1},
           "component_class": {"enum": ["core", "optional", "example"]},
           "implementation_status": {"enum": ["placeholder", "scaffolded", "partially-implemented", "implemented", "experimentally-validated", "example", "deprecated"]},
           "validation_status": {"type": "string", "minLength": 1},
-          "production_ready": {"type": "boolean"}
+          "production_ready": {"type": "boolean"},
+          "real_content_status": {"enum": ["not-applicable", "not-started", "sample-only", "partial", "complete"]},
+          "experimentally_validated": {"type": "boolean"}
         },
         "additionalProperties": false
       }

@@ -1,0 +1,21 @@
+{
+  "_sample_comment": "这是一个 sample，文件实质完成后删掉这行注释",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Work-Item Source Record",
+  "type": "object",
+  "required": ["work_source_id", "source_type", "title", "accessed_at"],
+  "properties": {
+    "_sample_comment": {"type": "string"},
+    "work_source_id": {"type": "string", "pattern": "^(WORK-SOURCE-[0-9]{4,}|SAMPLE-SOURCE-REPLACE)$"},
+    "source_type": {"type": "string", "minLength": 1},
+    "title": {"type": "string", "minLength": 1},
+    "path": {"type": "string"},
+    "path_or_uri": {"type": "string"},
+    "accessed_at": {"type": ["string", "null"], "format": "date"}
+  },
+  "anyOf": [
+    {"required": ["path"]},
+    {"required": ["path_or_uri"]}
+  ],
+  "additionalProperties": false
+}

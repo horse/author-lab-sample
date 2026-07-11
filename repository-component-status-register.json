@@ -7,72 +7,90 @@
       "path": "source-authors",
       "component_class": "core",
       "implementation_status": "implemented",
-      "validation_status": "schema-and-cross-reference-validated",
-      "production_ready": true
+      "validation_status": "rights-storage-schema-segmentation-and-cross-reference-validated",
+      "production_ready": true,
+      "real_content_status": "sample-only",
+      "experimentally_validated": false
     },
     {
       "component_id": "source-author-research-layer",
       "path": "source-author-research",
       "component_class": "core",
       "implementation_status": "scaffolded",
-      "validation_status": "structure-validated",
-      "production_ready": false
+      "validation_status": "claim-schema-and-provenance-chain-validated",
+      "production_ready": false,
+      "real_content_status": "sample-only",
+      "experimentally_validated": false
     },
     {
       "component_id": "source-author-model-layer",
       "path": "source-author-models",
       "component_class": "core",
       "implementation_status": "scaffolded",
-      "validation_status": "schema-and-cross-reference-validated",
-      "production_ready": false
+      "validation_status": "schema-cross-reference-and-provenance-validated",
+      "production_ready": false,
+      "real_content_status": "sample-only",
+      "experimentally_validated": false
     },
     {
       "component_id": "derived-author-persona-layer",
       "path": "derived-author-personas",
       "component_class": "core",
       "implementation_status": "implemented",
-      "validation_status": "template-schema-and-cross-reference-validated",
-      "production_ready": true
+      "validation_status": "template-schema-index-and-cross-reference-validated",
+      "production_ready": true,
+      "real_content_status": "sample-only",
+      "experimentally_validated": false
     },
     {
       "component_id": "shared-writing-harness",
       "path": "shared-writing-harness",
       "component_class": "core",
       "implementation_status": "implemented",
-      "validation_status": "schema-validated",
-      "production_ready": true
+      "validation_status": "schema-registry-runbook-policy-and-template-validated",
+      "production_ready": true,
+      "real_content_status": "not-applicable",
+      "experimentally_validated": false
     },
     {
       "component_id": "writing-work-items",
       "path": "writing-work-items",
       "component_class": "core",
       "implementation_status": "implemented",
-      "validation_status": "state-schema-and-cross-reference-validated",
-      "production_ready": true
+      "validation_status": "runbook-state-gate-run-hash-and-cross-reference-validated",
+      "production_ready": true,
+      "real_content_status": "sample-only",
+      "experimentally_validated": false
     },
     {
       "component_id": "author-model-evaluations",
       "path": "author-model-evaluations",
       "component_class": "core",
       "implementation_status": "scaffolded",
-      "validation_status": "structure-validated",
-      "production_ready": false
+      "validation_status": "rubric-and-schema-structure-validated",
+      "production_ready": false,
+      "real_content_status": "sample-only",
+      "experimentally_validated": false
     },
     {
       "component_id": "author-model-experiments",
       "path": "author-model-experiments",
       "component_class": "core",
       "implementation_status": "implemented",
-      "validation_status": "schema-and-scaffold-validated",
-      "production_ready": true
+      "validation_status": "four-condition-controlled-execution-held-out-and-result-schema-validated",
+      "production_ready": true,
+      "real_content_status": "sample-only",
+      "experimentally_validated": false
     },
     {
       "component_id": "approved-publications",
       "path": "approved-publications",
       "component_class": "core",
       "implementation_status": "implemented",
-      "validation_status": "transaction-gated",
-      "production_ready": true
+      "validation_status": "transaction-gated-schema-and-cross-reference-validated",
+      "production_ready": true,
+      "real_content_status": "sample-only",
+      "experimentally_validated": false
     },
     {
       "component_id": "chatgpt-runtime-adapter",
@@ -80,7 +98,9 @@
       "component_class": "optional",
       "implementation_status": "scaffolded",
       "validation_status": "configuration-schema-only",
-      "production_ready": false
+      "production_ready": false,
+      "real_content_status": "not-applicable",
+      "experimentally_validated": false
     },
     {
       "component_id": "openclaw-runtime-adapter",
@@ -88,7 +108,9 @@
       "component_class": "optional",
       "implementation_status": "scaffolded",
       "validation_status": "configuration-schema-only",
-      "production_ready": false
+      "production_ready": false,
+      "real_content_status": "not-applicable",
+      "experimentally_validated": false
     },
     {
       "component_id": "codex-runtime-adapter",
@@ -96,7 +118,9 @@
       "component_class": "optional",
       "implementation_status": "scaffolded",
       "validation_status": "configuration-schema-only",
-      "production_ready": false
+      "production_ready": false,
+      "real_content_status": "not-applicable",
+      "experimentally_validated": false
     },
     {
       "component_id": "claude-code-runtime-adapter",
@@ -104,7 +128,9 @@
       "component_class": "optional",
       "implementation_status": "scaffolded",
       "validation_status": "configuration-schema-only",
-      "production_ready": false
+      "production_ready": false,
+      "real_content_status": "not-applicable",
+      "experimentally_validated": false
     },
     {
       "component_id": "local-command-line-runtime-adapter",
@@ -112,7 +138,9 @@
       "component_class": "optional",
       "implementation_status": "scaffolded",
       "validation_status": "configuration-schema-only",
-      "production_ready": false
+      "production_ready": false,
+      "real_content_status": "not-applicable",
+      "experimentally_validated": false
     },
     {
       "component_id": "publication-site",
@@ -120,23 +148,29 @@
       "component_class": "optional",
       "implementation_status": "example",
       "validation_status": "configuration-schema-only",
-      "production_ready": false
+      "production_ready": false,
+      "real_content_status": "sample-only",
+      "experimentally_validated": false
     },
     {
       "component_id": "sample-source-author",
       "path": "source-authors/source-author-sample",
       "component_class": "example",
       "implementation_status": "scaffolded",
-      "validation_status": "schema-and-structure-validated",
-      "production_ready": false
+      "validation_status": "schema-structure-storage-and-segment-validated",
+      "production_ready": false,
+      "real_content_status": "sample-only",
+      "experimentally_validated": false
     },
     {
       "component_id": "sample-derived-authors",
       "path": "derived-author-personas",
       "component_class": "example",
       "implementation_status": "scaffolded",
-      "validation_status": "template-validated",
-      "production_ready": false
+      "validation_status": "template-and-index-validated",
+      "production_ready": false,
+      "real_content_status": "sample-only",
+      "experimentally_validated": false
     }
   ]
 }

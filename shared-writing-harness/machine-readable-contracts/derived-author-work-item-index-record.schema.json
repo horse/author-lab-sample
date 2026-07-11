@@ -1,0 +1,26 @@
+{
+  "_sample_comment": "这是一个 sample，文件实质完成后删掉这行注释",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Derived Author Work-Item Index Record",
+  "type": "object",
+  "required": ["derived_author_id", "canonical_work_item_id"],
+  "properties": {
+    "_sample_comment": {"type": "string"},
+    "derived_author_id": {"type": "string"},
+    "canonical_work_item_id": {"type": ["string", "null"]},
+    "lifecycle_status": {"type": "string"},
+    "canonical_state_file": {"type": "string"},
+    "index_status": {"type": "string"}
+  },
+  "oneOf": [
+    {
+      "required": ["canonical_work_item_id", "lifecycle_status", "canonical_state_file"],
+      "properties": {"canonical_work_item_id": {"type": "string"}}
+    },
+    {
+      "required": ["canonical_work_item_id", "index_status"],
+      "properties": {"canonical_work_item_id": {"type": "null"}}
+    }
+  ],
+  "additionalProperties": false
+}

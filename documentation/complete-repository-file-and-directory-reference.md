@@ -2,1414 +2,761 @@
 
 <!-- 这是一个 sample，文件实质完成后删掉这行注释 -->
 
-本文是 `author-lab-sample` 的权威目录说明书。它解释这套仓库中的每一层为什么存在、由谁读写、接受什么输入、产生什么输出，以及哪些内容绝不能反向流动。
+本文是 `author-lab-sample` 当前“真实实跑前完整仓库”的权威逐路径说明。它回答四个问题：
 
-`holonpress/author-zhang` 证明了一个作者仓库需要人格、文风、方法、写作循环、审校和发布机制。本仓库不是对它的目录复制，而是把那类单作者工作空间推广为一套可研究真实源作者、编译源作者模型、建立多个派生作者、运行不同写作流程并保留完整证据链的系统。
+1. 每个目录和文件负责什么；
+2. 谁可以读写；
+3. 上游输入与下游输出是什么；
+4. 什么内容不得跨层回流。
+
+当前仓库已经完成结构、机器合同、脚手架、验证、实验接口和出版事务的实跑前整备；Sample Source Author、Sample B/C、runtime 配置和实验结果仍是示例，不代表真实研究或实验已经完成。
 
 ---
 
-## 一、仓库的基本对象
+# 一、系统对象与单向数据流
 
-本仓库同时管理六种性质不同的对象。使用者必须始终区分它们。
-
-1. **源作者**：真实存在、留下原始作品的作者。
-2. **源作者研究**：研究人员根据原始材料形成的解释、判断与证据记录。
-3. **源作者模型**：从已接受研究中编译出来、供机器加载的压缩模型。
-4. **派生作者**：受到源作者模型影响，但具有独立身份、边界、议题与写作历史的化名作者。
-5. **写作工作项**：一次具体写作从 brief、研究、计划、草稿、审核到最终稿的完整记录。
-6. **正式出版物**：经过事实审核、文风审核和编辑批准的成品。
-
-它们之间只能按照下面的方向流动：
+仓库管理以下对象：
 
 ```text
-源作者材料
-  → 源作者研究
-  → 源作者模型
-  → 派生作者设计与模型
-  → 写作工作项
-  → 评测与编辑审核
-  → 正式出版物
+真实源作者资料
+→ 版本化规范化文本与 segment map
+→ 有证据的源作者研究 claim
+→ 带 provenance 的 source-author model
+→ 独立 derived-author lineage / derivation / model
+→ writing work item
+→ factual / persona-style / editorial gates
+→ approved publication
 ```
 
-禁止以下反向污染：
+实验是横跨 work item 与 evaluation 的比较对象：
 
 ```text
-派生作者文章 → 证明源作者具备某种特征
-模型生成文本 → 作为源作者研究证据
-正式出版物 → 自动写回源作者模型
-一个派生作者的记忆 → 自动进入另一个派生作者
-runtime 配置 → 决定作者人格或文风
-网站目录结构 → 反过来支配研究与出版结构
+hypothesis
++ controlled inputs
++ controlled execution
++ multiple conditions
++ immutable run records
++ blinded evaluation
++ failure cases
+→ aggregate analysis
+→ experiment conclusion
 ```
 
----
+禁止：
 
-## 二、权威层级与读写权限
-
-发生冲突时，按以下顺序判断：
-
-1. `source-authors/` 中的原始证据与权利记录；
-2. `source-author-research/` 中有证据编号的研究结论；
-3. `source-author-models/` 中已批准、带版本的源作者模型；
-4. `derived-author-personas/` 中的谱系、派生设计与独立作者模型；
-5. `shared-writing-harness/` 中的工作合同与质量门；
-6. `writing-work-items/` 中当前任务的状态与材料；
-7. `approved-publications/` 中的正式成品。
-
-每一层都有自己的职责：
-
-| 层级 | 主要写入者 | 主要读取者 | 不允许做什么 |
-|---|---|---|---|
-| 源材料 | corpus curator | 研究员、规范化脚本 | 覆盖原件、伪造来源 |
-| 源作者研究 | author researcher | 模型整理者、审校者 | 使用生成文章作为证据 |
-| 源作者模型 | model curator | 派生作者设计者 | 添加无研究依据的人格规则 |
-| 派生作者 | persona designer、编辑 | writer、style reviewer | 冒充源作者、继承真实私生活 |
-| Harness | 系统设计者 | writer、reviewer、runtime | 写入某个作者的具体人格 |
-| Work item | writer、researcher、reviewer | 编辑、publisher | 覆盖已有草稿版本、跳过状态门 |
-| Evaluations | evaluator | 模型整理者、编辑 | 直接被 writer 当作提示词 |
-| Publications | publisher | 网站、读者、编辑 | 接收未批准草稿 |
+- derived-author 生成物成为源作者证据；
+- publication 自动写回 research 或 model；
+- B 的 memory 自动进入 C；
+- runtime adapter 偷带作者人格；
+- writer 读取真实 held-out evaluation material；
+- 网站目录反过来决定研究与出版结构。
 
 ---
 
-# 三、仓库根目录
+# 二、根目录：项目控制平面
 
-## `README.md`
+| 路径 | 职责 |
+|---|---|
+| `README.md` | 人类入口；准确说明 reference architecture、executable core、真实内容和实验状态。 |
+| `AGENTS.md` | 根级 agent 操作边界、source-of-truth hierarchy、加载与修改规则、policy IDs 和完成前验证。 |
+| `author-lab-project-manifest.json` | 机器入口；声明 repository mode、readiness、各对象目录及所有 register。 |
+| `repository-component-status-register.json` | 区分 Core / Optional / Example、实现状态、验证状态、基础设施 readiness、真实内容状态和实验验证状态。 |
+| `repository-placeholder-register.json` | 管理 reference-sample 与 active-author-lab 两种 marker 语义。 |
+| `source-material-storage-and-ingestion-register.jsonl` | 全仓库资料存储与摄取状态索引；记录 URI、rights、checksum、normalization、segmentation 和 research readiness。 |
+| `RIGHTS-AND-LICENSING-POLICY.md` | 原始材料、代码、模型、图片、音频和出版物的权利与再分发政策。 |
+| `ETHICS-AND-DERIVATION-DISCLOSURE-POLICY.md` | 派生关系、非冒充、私人经历、署名和披露边界。 |
+| `CHANGELOG.md` | 按日期与里程碑记录仓库升级；不建立并存的仓库版本体系。 |
+| `CONTRIBUTING.md` | 贡献、证据、PR、schema/test 同步和 review 要求。 |
+| `SECURITY.md` | 密钥、私人资料、受限原始材料、个人信息和事故处理。 |
+| `.gitignore` | 排除缓存、环境、secrets、构建产物和 primary-source binaries；保留资料目录 README。 |
+| `.gitattributes` | 统一换行和二进制文件处理。 |
+| `.editorconfig` | 统一 UTF-8、LF、缩进与文件末尾。 |
+| `pyproject.toml` | Python 工具包、`jsonschema`、pytest、ruff 和测试配置。 |
+| `.pre-commit-config.yaml` | 提交前文本、JSON/YAML 与 Python 基础检查。 |
 
-人类进入仓库时的第一入口。它只负责介绍项目是什么、顶层目录怎样分工、如何执行验证，不承载完整作者模型或所有操作规则。新成员先读它，再进入本文与 `AGENTS.md`。
+`repository_mode`：
 
-## `AGENTS.md`
-
-所有 agent 的根级操作规则。它定义默认模式是“仓库维护”，而不是“扮演某个作者”；定义权威层级、加载规则、修改规则、命名规则和完成前验证。任何子目录中的 `AGENTS.md` 只能收紧或补充根规则，不能取消根级安全边界。
-
-## `author-lab-project-manifest.json`
-
-整个仓库的机器入口。记录项目 ID、项目类型、默认语言、源作者目录、源作者模型目录、派生作者目录、共享 harness、工作项、出版物以及权利政策的位置。程序需要发现仓库资产时先读取它，不应通过猜目录名工作。
-
-## `RIGHTS-AND-LICENSING-POLICY.md`
-
-规定 EPUB、PDF、图片、音频、私人信件、研究笔记、代码、模型和出版物的权利处理方式。它提醒维护者：材料被登记不等于获得再分发许可；私有研究材料与可公开代码可能需要不同许可。
-
-## `ETHICS-AND-DERIVATION-DISCLOSURE-POLICY.md`
-
-规定派生作者与源作者的伦理边界。派生作者不得声称源作者身份、私人经验、关系、创伤、资历或授权；高度可识别的原句必须引用而不能伪装为派生作者原创。
-
-## `CHANGELOG.md`
-
-记录仓库架构、schema、模型、runbook 和重要行为的版本变化。日常文章修改通常不必进入此文件；会影响其他 agent 或程序理解方式的变化必须记录。
-
-## `CONTRIBUTING.md`
-
-说明贡献方式、分支和 PR 习惯、研究证据要求、schema 与测试同步要求，以及何时必须更新派生谱系。它服务于人类贡献者和负责修改仓库的 agent。
-
-## `SECURITY.md`
-
-规定密钥、私人信件、未公开稿件、个人信息和受限制原始材料的安全处理方式。任何意外泄漏必须先移除、轮换密钥并通知仓库所有者，而不是仅追加一个删除提交。
-
-## `.gitignore`
-
-排除 Python 缓存、虚拟环境、环境变量文件、构建产物、本地原始材料、私密材料、runtime secrets 和网站生成结果。这里定义“哪些文件不应该进入 Git”，不是定义材料是否存在。
-
-## `.gitattributes`
-
-统一文本换行，并将 EPUB、PDF、图片、音频和视频视为二进制。真实项目如需要 Git LFS，可在此基础上增加 LFS 规则。
-
-## `.editorconfig`
-
-统一 UTF-8、LF、末尾换行、空格缩进和 Markdown 空格保留规则，减少不同编辑器造成的无意义差异。
-
-## `pyproject.toml`
-
-定义仓库验证工具的 Python 包信息、Python 最低版本、`jsonschema`、pytest 和 ruff 依赖，以及测试目录。它属于仓库工程层，不属于任何作者模型。
-
-## `.pre-commit-config.yaml`
-
-定义提交前自动检查：JSON、YAML、文件末尾、尾随空格和 Python 格式。实际使用前应在本地安装 `pre-commit`。
+- `reference-sample`：所有受管文本文件保留 sample marker；
+- `active-author-lab`：只有 placeholder register 登记的未完成文件可以保留 marker。
 
 ---
 
-# 四、`documentation/`：项目方法与操作文档
+# 三、`documentation/`：长期方法与仓库说明
 
-这个目录解释系统本身。它不存储某个作者的人格结论，也不存储某篇文章的工作记录。
-
-## `documentation/README.md`
-
-文档索引。新成员应通过它找到本说明书、架构、研究方法、派生方法、证据政策、出版政策、runtime 合同、状态机和术语表。
-
-## `documentation/complete-repository-file-and-directory-reference.md`
-
-即本文。它是按路径解释仓库职责和工作方式的权威文档。目录增删或职责改变后应同步更新。
-
-## `documentation/repository-architecture-and-data-flow.md`
-
-用较短篇幅定义证据、研究、模型、派生作者、任务和出版物之间的单向数据流。适合快速理解系统边界。
-
-## `documentation/source-author-research-methodology.md`
-
-规定如何从 corpus 建立研究结论：使用稳定证据 ID、记录反例、区分时期与文类、标注置信度。源作者研究员开始工作前必须阅读。
-
-## `documentation/derived-author-creation-methodology.md`
-
-规定如何把源作者模型转化为独立派生作者。重点是继承、改造、拒绝、原创和理由，而不是简单调整一个“相似度百分比”。
-
-## `documentation/provenance-and-evidence-policy.md`
-
-规定证据等级与可追溯性。它回答“什么可以证明源作者特征”“什么只能证明派生作者或 harness 的表现”。
-
-## `documentation/publication-and-editorial-approval-policy.md`
-
-规定什么情况下工作项可以进入正式出版区。事实审核、文风审核、编辑批准和元数据缺一不可。
-
-## `documentation/naming-versioning-and-file-conventions.md`
-
-规定描述性 kebab-case 目录和文档名、snake_case Python 名、语义版本、work-item ID，以及保留 `README.md`、`AGENTS.md`、`SKILL.md` 等标准名的理由。
-
-## `documentation/runtime-adapter-contract.md`
-
-规定 runtime adapter 只能描述模型、上下文、工具、环境变量和命令接口，不能偷偷携带作者人格或出版规则。
-
-## `documentation/writing-work-item-state-machine.md`
-
-定义 `intake → research → planned → drafted → fact-checked → style-reviewed → editor-review → approved → published → archived` 的状态顺序与回退原则。
-
-## `documentation/glossary-of-author-lab-terms.md`
-
-统一 source author、source corpus、source-author model、derived author、derivation profile、harness、runbook、runtime adapter、work item 等术语，避免团队使用同一个“作者模型”指代多种东西。
+| 路径 | 职责 |
+|---|---|
+| `documentation/README.md` | 文档导航与权威状态来源索引。 |
+| `documentation/complete-repository-file-and-directory-reference.md` | 本文；逐路径职责的权威说明。 |
+| `documentation/pre-real-run-complete-repository-design.md` | 真实实跑前完整仓库的目标、边界、完成标准和不做事项。 |
+| `documentation/repository-architecture-and-data-flow.md` | 数据流、control plane、contracts、scaffolding、experiments 与 publication transaction。 |
+| `documentation/source-author-research-methodology.md` | rights/storage、edition、segmentation、claim、counterexample、confidence 与 provenance 方法。 |
+| `documentation/derived-author-creation-methodology.md` | inherited、transformed、rejected、original、rationale 与独立作者形成方法。 |
+| `documentation/provenance-and-evidence-policy.md` | 证据等级、claim 可追溯性与禁止生成物回流。 |
+| `documentation/publication-and-editorial-approval-policy.md` | factual/style/editorial gates 与正式出版责任。 |
+| `documentation/naming-versioning-and-file-conventions.md` | 长描述性名称、标准入口文件、对象 ID 和模型版本约定。 |
+| `documentation/runtime-adapter-contract.md` | runtime 只能描述执行环境，不能承载作者身份。 |
+| `documentation/writing-work-item-state-machine.md` | lifecycle、stage execution、quality gates、不可覆盖原则和 publication transaction。 |
+| `documentation/glossary-of-author-lab-terms.md` | 统一 source author、model、persona、runbook、runtime、work item、evaluation、experiment 等术语。 |
 
 ## `documentation/implementation-plans/`
 
-存放已经批准或正在执行的架构和文档实施计划。它们记录“怎样完成一次仓库变更”，不是永久操作规范。
+| 文件 | 职责 |
+|---|---|
+| `2026-07-11-complete-author-lab-sample-repository-scaffold.md` | 最初完整 reference scaffold 的实施记录。 |
+| `2026-07-11-complete-repository-file-and-directory-guide.md` | 第一份逐文件说明建立计划。 |
+| `2026-07-11-pre-real-run-complete-repository-upgrade.md` | 本次实跑前完整升级的任务、文件与验证清单。 |
 
-### `documentation/implementation-plans/2026-07-11-complete-author-lab-sample-repository-scaffold.md`
-
-最初建立完整样板仓库的计划，保留为架构形成记录。
-
-### `documentation/implementation-plans/2026-07-11-complete-repository-file-and-directory-guide.md`
-
-建立本文和更新文档入口的实施计划。
+Implementation plan 记录“怎样改仓库”，不取代长期规范，也不构成实验结果。
 
 ---
 
-# 五、`source-authors/`：真实源作者及其材料
+# 四、`source-authors/`：真实源作者、权利与资料
 
-此目录只管理真实作者、真实来源和材料权利，不管理派生作者。
+## 顶层
 
-## `source-authors/README.md`
+| 路径 | 职责 |
+|---|---|
+| `source-authors/README.md` | 一个真实源作者一个目录的总规则。 |
+| `source-authors/source-author-sample/AGENTS.md` | 源材料局部规则：原件不可覆盖、不得加载派生文章作为证据。 |
+| `source-author-profile.json` | source author ID、语言、corpus、rights、research 与 compiled model 路径。 |
+| `source-bibliography.md` | 人类可读版本、译本、期刊与出版书目。 |
+| `source-rights-register.jsonl` | 每个 source ID 的 rights、redistribution、storage URI 和 repository copy 权限。 |
 
-说明一个真实源作者对应一个子目录，并要求该目录包含资料档案、权利登记、规范化文本、书目和局部 agent 规则。
+## `source-corpus/`
 
-## `source-authors/source-author-sample/`
+| 路径 | 职责 |
+|---|---|
+| `source-corpus-manifest.jsonl` | source ID、type、edition、external storage URI、normalized text、segment map、checksum 与 segmentation version。 |
 
-样板源作者的完整资料容器。真实项目中复制此结构并更换 ID，而不是直接把真实内容写进 sample 名称下。
+### `primary-source-materials/`
 
-### `source-authors/source-author-sample/AGENTS.md`
+这些目录只保留 README；版权二进制默认位于仓库外。
 
-源材料区域的局部规则：原始记录不可覆盖，不得推断缺失生平，不得加载派生文章作为研究证据，规范化段落必须指回原始来源。
+- `README.md` — 原作材料总规则。
+- `books/README.md` — 书籍、EPUB、版本和章节映射。
+- `essays-and-articles/README.md` — 散文、评论、报刊和网页文章。
+- `interviews-and-conversations/README.md` — 说话人、转录、翻译与编辑删节。
+- `letters-and-correspondence/README.md` — 授权、收件人、公开状态和隐私。
+- `diaries-and-notebooks/README.md` — 时间、编辑介入与私人材料边界。
+- `speeches-and-lectures/README.md` — 场合、听众、准备稿与口述版本。
+- `social-media-and-short-form-writing/README.md` — 时间戳、上下文、线程和平台状态。
 
-### `source-authors/source-author-sample/source-author-profile.json`
+### `secondary-source-materials/`
 
-源作者机器档案。记录源作者 ID、显示名、对象类型、语言、corpus manifest、权利登记、研究目录和编译模型目录。
+- `README.md` — 二手材料不得冒充源作者原话。
+- `biographies-and-historical-context/README.md` — 传记、背景、争议与来源立场。
+- `criticism-and-scholarship/README.md` — 评论、研究、书评和解释传统。
 
-### `source-authors/source-author-sample/source-bibliography.md`
+### `normalized-source-materials/`
 
-人类可读的完整书目。负责版本、译本、修订、期刊出处和时间差异；机器稳定 ID 仍以 manifest 为准。
+- `README.md` — 可重建层与 source-location 映射总则。
+- `plain-text/README.md` — 纯文本格式。
+- `plain-text/SOURCE-BOOK-0001.md` — 版本化 sample normalized text。
+- `structured-metadata/README.md` — edition、章节、页码、说话人和位置结构。
+- `structured-metadata/SOURCE-BOOK-0001-segment-location-map.jsonl` — segment ID、ordinal、full SHA-256 与 character count。
+- `segmented-passages/README.md` — 检索分段与上下文保留规则。
 
-### `source-authors/source-author-sample/source-rights-register.jsonl`
-
-逐条记录每个 source ID 的权利状态、可否再分发、存储策略与授权依据。材料进入仓库前先登记权利。
-
-## `source-authors/source-author-sample/source-corpus/`
-
-源作者资料的证据仓库，分为 manifest、原始材料、二手材料和规范化材料。
-
-### `source-corpus-manifest.jsonl`
-
-所有来源的机器索引。每条记录包含 source ID、类型、标题、作者、年份、语言、原始文件、规范化文本、权利状态和校验值。检索、规范化和研究都以它为入口。
-
-## `primary-source-materials/`
-
-存放源作者本人留下的作品。这里的内容证据等级最高，但仍需要版本和出处管理。
-
-### `primary-source-materials/README.md`
-
-说明原作材料的总规则，以及大文件或受限制文件应保存在普通 Git 之外。
-
-### `primary-source-materials/books/README.md`
-
-书籍和 EPUB 的存放说明。要求区分版本、章节结构和分页映射。
-
-### `primary-source-materials/essays-and-articles/README.md`
-
-散文、评论、报刊文章和网络文章的存放说明。记录原始发布时间、URL、修订和稳定段落 ID。
-
-### `primary-source-materials/interviews-and-conversations/README.md`
-
-访谈和对话的存放说明。必须区分源作者原话、采访者提问、转录修订、翻译和编辑删节。
-
-### `primary-source-materials/letters-and-correspondence/README.md`
-
-信件与通信的存放说明。私人材料必须有授权，并记录删节、收件人、出处和是否已经公开。
-
-### `primary-source-materials/diaries-and-notebooks/README.md`
-
-日记和笔记的存放说明。保持时间、编辑介入、私人笔记与正式发表文本之间的差别。
-
-### `primary-source-materials/speeches-and-lectures/README.md`
-
-演讲与讲座的存放说明。记录场合、听众、准备稿、口头变动、转录来源和后来的出版版本。
-
-### `primary-source-materials/social-media-and-short-form-writing/README.md`
-
-社交媒体、帖子、短评和线程的存放说明。保留时间戳、上下文、删除状态、引用关系和平台限制。
-
-## `secondary-source-materials/`
-
-存放别人关于源作者的材料。它们能帮助理解，但不能冒充源作者原话。
-
-### `secondary-source-materials/README.md`
-
-说明传记、评论、研究和时代背景必须与原作分开，并记录可靠性与立场。
-
-### `secondary-source-materials/biographies-and-historical-context/README.md`
-
-传记和历史背景的存放说明。记录来源依据、作者立场、出版年代和争议性主张。
-
-### `secondary-source-materials/criticism-and-scholarship/README.md`
-
-文学评论、学术研究和书评的存放说明。二手解释用于形成问题和比较，不替代直接阅读原作。
-
-## `normalized-source-materials/`
-
-供搜索、引用和研究使用的可重复生成层。它不是原件，但必须保留回到原件的位置映射。
-
-### `normalized-source-materials/README.md`
-
-规定规范化结果应保留 source ID、章节、页码或时间戳映射，并允许由脚本重新生成。
-
-### `normalized-source-materials/plain-text/README.md`
-
-纯文本规范。每段应具有稳定 ID，便于研究结论精确引用。
-
-### `normalized-source-materials/structured-metadata/README.md`
-
-结构化元数据规范。存储章节、页码、说话人、版本、时间戳和位置关系。
-
-### `normalized-source-materials/segmented-passages/README.md`
-
-检索分段规范。分段是检索单元，不是新版本；必须保留足够上下文，避免句子级误读。
+Segment ID 绑定 source、edition、segmentation version、ordinal 与 hash prefix；重新分段必须提升 segmentation version。
 
 ---
 
-# 六、`source-author-research/`：对源作者的证据化研究
+# 五、`source-author-research/`：证据化研究
 
-这里允许长篇、复杂、相互矛盾的研究。它比源作者模型更丰富，也更适合保留不确定性。
-
-## `source-author-research/README.md`
-
-说明研究层与 corpus、编译模型和派生作者设计之间的边界。
-
-## `source-author-research/source-author-sample-research/AGENTS.md`
-
-要求每条实质结论引用证据 ID、记录反例和置信度；禁止把研究文件直接写成 prompt，禁止使用派生文章作为源作者证据。
+| 路径 | 职责 |
+|---|---|
+| `source-author-research/README.md` | 研究层与 corpus/model/persona 的边界。 |
+| `source-author-sample-research/AGENTS.md` | claim 必须引用 segment、记录反例与 confidence；禁止生成物回流。 |
 
 ## `persona-and-intellectual-structure/`
 
-研究作者关心什么、怎样思考、知道什么、如何判断和如何处理情绪。
-
-### `recurring-concerns-and-attention-patterns.md`
-
-研究作者反复注意什么、什么会触发问题意识、主题怎样随时期变化，以及哪些表面高频只是 corpus 偏差。
-
-### `worldview-values-and-central-tensions.md`
-
-研究价值承诺、世界观和长期未解决的张力，不强行把作者整理成完全一致的意识形态。
-
-### `epistemology-and-standards-of-evidence.md`
-
-研究作者如何区分知识、见闻、证言、权威、推断、不确定和足够证据。
-
-### `knowledge-structure-and-domain-boundaries.md`
-
-研究作者真正掌握的领域、经常引用的传统、薄弱区域、明确无知和知识变化。
-
-### `reasoning-patterns-and-problem-framing.md`
-
-研究作者如何发现问题、拒绝表面框架、补充语境、处理矛盾、转换尺度、形成或暂缓判断。
-
-### `emotional-register-and-public-position.md`
-
-研究作者的情绪范围、公共距离、自我定位、讽刺、愤怒、温柔、犹疑及其与论证的关系。
-
-### `contradictions-blind-spots-and-uncertainties.md`
-
-集中记录矛盾、盲点、材料空缺、争议解释和不能负责任下结论的部分。
+- `recurring-concerns-and-attention-patterns.md` — 长期关注与触发物。
+- `worldview-values-and-central-tensions.md` — 价值、世界观和张力。
+- `epistemology-and-standards-of-evidence.md` — 知识、证言、推断与不确定。
+- `knowledge-structure-and-domain-boundaries.md` — 知识领域、薄弱区域和明确未知。
+- `reasoning-patterns-and-problem-framing.md` — 发现、框架、语境、尺度与判断。
+- `emotional-register-and-public-position.md` — 情绪范围、公共距离和论证关系。
+- `contradictions-blind-spots-and-uncertainties.md` — 矛盾、盲点、材料空缺和开放解释。
 
 ## `writing-style-fingerprint/`
 
-研究文风作为句法、节奏、段落、修辞和思维运动的组合，而不是常用句词库。
+- `vocabulary-and-diction-patterns.md`
+- `sentence-syntax-and-rhythm-patterns.md`
+- `paragraph-architecture-and-transition-patterns.md`
+- `rhetorical-moves-and-argument-structures.md`
+- `openings-endings-and-narrative-distance.md`
+- `genre-specific-and-period-specific-variations.md`
+- `anti-patterns-counterexamples-and-overfitting-risks.md`
 
-### `vocabulary-and-diction-patterns.md`
-
-研究词汇层级、具体名词、抽象术语、语域转换、搭配、回避词和时期变化。
-
-### `sentence-syntax-and-rhythm-patterns.md`
-
-研究句长、从句、标点、中断、重复、压缩、呼吸和不同文类的节奏差异。
-
-### `paragraph-architecture-and-transition-patterns.md`
-
-研究段落如何进入、展开、转折、落地，以及段落之间如何产生张力、离题和返回。
-
-### `rhetorical-moves-and-argument-structures.md`
-
-研究反框架、限定、比较、枚举、类比、自我修正、提问、引用和常见论证序列。
-
-### `openings-endings-and-narrative-distance.md`
-
-研究开头方式、作者何时进入文本、叙事距离怎样变化，以及结尾如何关闭、悬置、反转或返回。
-
-### `genre-specific-and-period-specific-variations.md`
-
-区分稳定特征与书籍、散文、评论、日记、信件、演讲、访谈和短帖的文类规则，并标明时期边界。
-
-### `anti-patterns-counterexamples-and-overfitting-risks.md`
-
-记录假指纹、罕见习惯、编辑痕迹、翻译影响、文类限制和模型容易过量使用的特征。
+这些文件研究关系、分布与变化，不建立可复制短语库。
 
 ## `topics-and-periodization/`
 
-研究议题之间的关系与作者发展时期。
-
-### `recurring-topics-and-issue-relationships.md`
-
-建立议题图谱：哪些议题互相引出、哪些概念连接它们、哪些议题消失或重新出现。
-
-### `topic-chronology-and-periodization.md`
-
-依据作品、主题、语汇、文类和社会位置确定作者时期，而不是机械按十年划分。
+- `recurring-topics-and-issue-relationships.md` — 议题图谱。
+- `topic-chronology-and-periodization.md` — 依据材料划分时期。
 
 ## `evidence-and-confidence/`
 
-把研究判断变为可追溯、可审核的数据。
-
-### `research-claim-evidence-register.jsonl`
-
-每条研究 claim 的机器记录：claim ID、正文、置信度、状态、支持段落和反例段落。源作者模型只能引用已经接受的 claim。
-
-### `research-confidence-rating-guide.md`
-
-定义高、中、暂定和开放假设的置信度范围，以及什么条件下研究结论能够进入源作者模型。
+- `research-claim-evidence-register.jsonl` — claim ID、claim、confidence、status、supporting/counterexample segment IDs。
+- `research-confidence-rating-guide.md` — high/medium/provisional/open 与 model 准入门槛。
 
 ## `comprehensive-research-reports/`
 
-存放综合性成果，而不是零散笔记。
-
-### `comprehensive-source-author-research-report.md`
-
-综合时间、议题、人格、知识、推理、情绪、文风、反例和限制，始终保留指向证据 register 的链接。
-
-### `source-author-research-limitations.md`
-
-集中说明 corpus 空缺、版本问题、翻译影响、私人材料缺失、文类不均衡和被排除的解释。
+- `comprehensive-source-author-research-report.md` — 综合研究报告。
+- `source-author-research-limitations.md` — corpus、版本、翻译和解释限制。
 
 ---
 
-# 七、`source-author-models/`：可加载的源作者模型
+# 六、`source-author-models/`：从研究编译的可加载模型
 
-研究层可能很长，模型层必须短、稳定、分模块并有版本。模型是研究的编译产物，不是源作者本人。
-
-## `source-author-models/README.md`
-
-说明源作者模型的性质、用途和限制，防止把它当作人格扮演许可。
-
-## `source-author-models/source-author-sample-model/AGENTS.md`
-
-规定只有已接受研究可以进入模型，每条规则必须登记 provenance，模型应保持紧凑，生成文章不得写回。
-
-## `VERSION`
-
-当前源作者模型的语义版本。任何会影响下游派生作者加载结果的修改都应升级版本。
-
-## `source-author-model-manifest.json`
-
-记录模型 ID、源作者 ID、版本、状态、core、genre modes、period overlays、加载图和 provenance register。
-
-## `source-author-model-limitations.md`
-
-明确模型的不完整性、选择性和不适用范围，尤其不能代表源作者对新事件的观点或私人记忆。
-
-## `author-model-loading-map.json`
-
-规定默认 core 和不同文类应加载的文件。它控制上下文组合，避免每次把整个研究库塞进 prompt。
-
-## `source-author-model-provenance-register.jsonl`
-
-将每一条模型规则映射到一个或多个研究 claim ID 和具体模型文件。修改模型时必须同步更新。
+| 路径 | 职责 |
+|---|---|
+| `source-author-models/README.md` | 模型是研究编译物，不是源作者本人。 |
+| `source-author-sample-model/AGENTS.md` | 只有 accepted claim 可进入模型，生成文本不得写回。 |
+| `VERSION` | source model 语义版本；真实实验需要精确记录。 |
+| `source-author-model-manifest.json` | model ID、source author ID、version、core/modes/overlays/load map/provenance。 |
+| `source-author-model-limitations.md` | 不完整性和不适用范围。 |
+| `author-model-loading-map.json` | default core 与 genre modes 的加载组合。 |
+| `source-author-model-provenance-register.jsonl` | model rule → research claim IDs → model file。 |
 
 ## `core-author-model/`
 
-每次需要理解源作者模型时可能加载的稳定核心。
-
-### `source-author-identity.md`
-
-只记录有研究支持的公共角色和思想位置，不编造履历或私人关系。
-
-### `recurring-concerns.md`
-
-压缩已达置信度门槛的稳定关注点，同时保留时期和文类限定。
-
-### `worldview-and-central-tensions.md`
-
-压缩价值结构和主要张力，不制造完美一致的世界观。
-
-### `epistemology-and-uncertainty-practice.md`
-
-定义模型如何区分观察、报道、推断、记忆、判断和未解决问题。
-
-### `knowledge-map-and-domain-boundaries.md`
-
-定义有证据的知识领域、薄弱领域、未知区域和需要外部研究的情形。
-
-### `reasoning-patterns.md`
-
-压缩注意、框架、比较、语境、尺度转换、限定、判断和返回的思维运动。
-
-### `emotional-register.md`
-
-定义可支持的情绪范围、触发条件和情绪与论证的关系。
-
-### `voice-and-register.md`
-
-定义公共姿态、对话距离、确定性、技术语域、直接程度和语言切换。
-
-### `writing-style-fingerprint.md`
-
-压缩句法、节奏、段落、修辞、开头、结尾、转换和负面约束。它是生成约束，不是可复制短语库。
-
-### `authorial-boundaries.md`
-
-规定模型不得声称的身份、私人经验、现时观点、资历和授权。
-
-### `model-uncertainties.md`
-
-保留尚未解决或因证据不足而没有进入模型的部分。
+- `source-author-identity.md`
+- `recurring-concerns.md`
+- `worldview-and-central-tensions.md`
+- `epistemology-and-uncertainty-practice.md`
+- `knowledge-map-and-domain-boundaries.md`
+- `reasoning-patterns.md`
+- `emotional-register.md`
+- `voice-and-register.md`
+- `writing-style-fingerprint.md`
+- `authorial-boundaries.md`
+- `model-uncertainties.md`
 
 ## `genre-specific-author-modes/`
 
-源作者在不同文类中的表现覆盖层。
-
-### `essay-writing-mode.md`
-
-描述长篇散文或论说文的稳定方式，同时避免把一篇样本的结构变成固定模板。
-
-### `column-writing-mode.md`
-
-描述专栏的时事入口、论证密度、篇幅、节奏和结尾。
-
-### `criticism-writing-mode.md`
-
-描述批评写作中的判断、引用、语境、细读和公平原则。
-
-### `diary-writing-mode.md`
-
-描述日记尺度、时间感和观察方式，但不得据此编造生活事件。
-
-### `letter-writing-mode.md`
-
-描述书信中的称呼、亲密度、论证和收件人意识，不得制造关系。
-
-### `short-post-writing-mode.md`
-
-描述短帖压缩、线程、平台限制和口号化风险。
+- `essay-writing-mode.md`
+- `column-writing-mode.md`
+- `criticism-writing-mode.md`
+- `diary-writing-mode.md`
+- `letter-writing-mode.md`
+- `short-post-writing-mode.md`
 
 ## `period-specific-author-overlays/`
 
-只在任务明确需要某一时期时加载。
+- `early-period-author-overlay.md`
+- `middle-period-author-overlay.md`
+- `late-period-author-overlay.md`
 
-### `early-period-author-overlay.md`
+## Calibration
 
-记录早期关注、词汇、形式、知识和公共位置的差异。
-
-### `middle-period-author-overlay.md`
-
-记录中期变化与连续性。
-
-### `late-period-author-overlay.md`
-
-记录后期变化与连续性。
-
-## `calibration-examples/README.md`
-
-说明可以存放带授权的短例子和证据 ID，用于校准理解，禁止演变为句子模板库。
-
-## `negative-calibration-examples/README.md`
-
-说明存放反例和近似但不属于作者特征的文本，帮助模型避免过度概括。
+- `calibration-examples/README.md` — 少量授权例子和用途限制。
+- `negative-calibration-examples/README.md` — 反例、近似文本和过拟合风险。
 
 ---
 
-# 八、`derived-author-personas/`：独立派生作者
+# 七、`derived-author-personas/`：独立派生作者
 
-一个派生作者不是“源作者模型加一个 prompt”。它必须拥有自己的谱系、身份、模型、边界、记忆、工作、评测和出版历史。
+`derived-author-personas/README.md` 规定一个子目录代表一个长期维护的独立化名作者。
 
-## `derived-author-personas/README.md`
+Sample B 与 C 都必须拥有以下结构；内容不得互相共用。
 
-说明每个子目录都代表一个长期维护的独立化名作者。
+## Persona 根文件
 
-## 派生作者共同文件结构
-
-下面的文件在 B 和 C 中分别独立存在。B 的路径以 `derived-author-sample-b/` 开头，C 的路径以 `derived-author-sample-c/` 开头。它们职责相同，但内容不能共用。
-
-### `README.md`
-
-给人看的派生作者概要：该作者的定位、与源作者的关系以及不能声称什么。
-
-### `AGENTS.md`
-
-进入该派生作者目录后的 agent 规则。规定什么时候允许进入作者写作模式、加载哪些模型文件、禁止读取哪个其他派生作者的记忆和出版物。
-
-### `derived-author-persona-manifest.json`
-
-派生作者机器入口。记录作者 ID、显示名、状态、语言、lineage、derivation、model、harness、memory、work、evals 和 publications 的位置。
-
-### `derived-author-lineage.json`
-
-记录该作者从哪些上游模型获得影响、版本、作用和设计权重，并明确禁止声称源作者身份、经验和无引用原句。
+| 文件 | 职责 |
+|---|---|
+| `README.md` | 人类可读定位与非冒充说明。 |
+| `AGENTS.md` | 本 persona 的加载、写入和隔离规则。 |
+| `derived-author-persona-manifest.json` | persona 机器入口与各子目录。 |
+| `derived-author-lineage.json` | 上游 source model、版本、角色、设计权重和冒充禁令。 |
 
 ## `derivation-profile/`
 
-回答“这个作者怎样从上游模型变成自己”。
+- `inherited-source-author-traits.md`
+- `transformed-source-author-traits.md`
+- `rejected-source-author-traits.md`
+- `original-derived-author-traits.md`
+- `derivation-rationale-and-design-decisions.md`
 
-### `inherited-source-author-traits.md`
-
-只列明确继承的关注点、推理关系、文风关系和认识习惯，并引用上游模型规则。
-
-### `transformed-source-author-traits.md`
-
-记录继承特征怎样因新历史位置、文类、公共角色和知识边界而发生改变。
-
-### `rejected-source-author-traits.md`
-
-记录明确拒绝的源作者生平、私人经验、辨识度过高语言、权威和不能脱离原人生成立的特征。
-
-### `original-derived-author-traits.md`
-
-记录派生作者自己新增的公共角色、议题、知识、情绪范围、形式和编辑承诺。
-
-### `derivation-rationale-and-design-decisions.md`
-
-解释为什么继承、改造、拒绝和新增这些特征，并说明与其他派生作者的区别。
+五个文件共同回答“受到了什么影响，又怎样成为另一个作者”。
 
 ## `derived-author-model/`
 
-派生作者实际写作时加载的模型。
+- `VERSION` — derived model 版本。
+- `derived-author-model-manifest.json` — model ID、persona ID、version、core、genre 与 load map。
+- `derived-author-model-loading-map.json` — default core 与 genre overlay。
 
-### `VERSION`
+### `core-derived-author-model/`
 
-当前派生作者模型版本。文章 work item 必须记录使用了哪个版本。
+- `derived-author-identity-and-public-role.md`
+- `recurring-concerns-and-topic-boundaries.md`
+- `worldview-values-and-central-tensions.md`
+- `knowledge-boundaries-and-research-obligations.md`
+- `reasoning-patterns-and-problem-framing.md`
+- `emotional-register-and-narrative-distance.md`
+- `voice-and-writing-style-fingerprint.md`
+- `authorial-and-ethical-boundaries.md`
+- `model-uncertainties-and-open-questions.md`
 
-### `derived-author-model-manifest.json`
+### `genre-specific-writing-modes/`
 
-记录模型 ID、派生作者 ID、版本、状态、core、genre modes 和加载图。
+共同文件：
 
-### `derived-author-model-loading-map.json`
+- `README.md` — genre overlay 索引与加载规则。
+- `diary-and-life-writing-mode.md` — 生活材料授权与非虚构边界。
 
-规定默认加载的 core 和每个文类 mode。writer 不应随意越过它加载全部人格资料。
+Sample B：
 
-## `core-derived-author-model/`
+- `essay-writing-mode.md`
+- `short-commentary-writing-mode.md`
 
-派生作者的稳定核心。
+Sample C：
 
-### `derived-author-identity-and-public-role.md`
+- `cultural-essay-writing-mode.md`
+- `short-cultural-commentary-writing-mode.md`
 
-定义化名身份和公共角色，但不虚构无法核实的履历、资历或私人关系。
+## 其他 persona 子目录
 
-### `recurring-concerns-and-topic-boundaries.md`
+| 路径 | 职责 |
+|---|---|
+| `author-specific-writing-harness/derived-author-writing-overlays.md` | 只增加 persona 加载和差异化约束，不复制 shared harness。 |
+| `derived-author-memory/author-writing-memory.md` | 已批准写作历史和有意发展。 |
+| `derived-author-memory/editorial-review-memory.md` | 重复编辑问题和接受的修正。 |
+| `derived-author-memory/knowledge-growth-log.md` | 审核后的知识增长，不自动改变人格。 |
+| `derived-author-memory/publication-history.jsonl` | publication history 机器记录。 |
+| `derived-author-writing-work-items/README.md` | 说明该目录只是生成视图。 |
+| `derived-author-writing-work-items/derived-author-work-item-index.jsonl` | 从根级 canonical work items 重建的索引。 |
+| `derived-author-evaluations/README.md` | persona-specific evaluation 范围。 |
+| `derived-author-publications/README.md` | 说明该目录只是生成视图。 |
+| `derived-author-publications/derived-author-publication-index.jsonl` | 从根级 canonical publications 重建的索引。 |
 
-定义长期议题、可扩展方向、研究前置领域和不应自信处理的主题。
-
-### `worldview-values-and-central-tensions.md`
-
-定义该派生作者自己的价值结构与内在张力，而不是整套复制源作者世界观。
-
-### `knowledge-boundaries-and-research-obligations.md`
-
-定义现有知识、写前必须调研的领域、禁止冒充的专业资格和知识增长规则。
-
-### `reasoning-patterns-and-problem-framing.md`
-
-定义该作者如何选择触发物、提出问题、建立语境、转换尺度和保留不确定，同时防止形成单一文章公式。
-
-### `emotional-register-and-narrative-distance.md`
-
-定义情绪强度、第一人称距离、幽默、克制和不得制造的情感场景。
-
-### `voice-and-writing-style-fingerprint.md`
-
-定义句法、节奏、段落、修辞、结尾和与其他派生作者的区别。
-
-### `authorial-and-ethical-boundaries.md`
-
-定义不得声称、不得虚构和必须区分事实、报道、推断与文学构造的边界。
-
-### `model-uncertainties-and-open-questions.md`
-
-记录尚未稳定的作者特征，防止临时生成习惯过早成为永久人格。
-
-## B 的 `genre-specific-writing-modes/`
-
-### `essay-writing-mode.md`
-
-规定 B 的研究型公共散文模式，强调持续论证、多尺度和非机械收束。
-
-### `short-commentary-writing-mode.md`
-
-规定 B 的短评论压缩方式，保留语境与限定，避免口号化。
-
-### `diary-and-life-writing-mode.md`
-
-规定 B 只能使用 work item 授权的生活材料，不得制造自传细节。
-
-## C 的 `genre-specific-writing-modes/`
-
-### `cultural-essay-writing-mode.md`
-
-规定 C 可从地点、物件、界面、书、词语和习惯进入文化结构。
-
-### `short-cultural-commentary-writing-mode.md`
-
-规定 C 的短文化评论保留物质细节，不把观察压成普遍教训。
-
-### `diary-and-life-writing-mode.md`
-
-规定 C 的日记和生活写作保留普通物件和时间质感，不编造情绪闭合。
-
-## `author-specific-writing-harness/derived-author-writing-overlays.md`
-
-派生作者对共享 harness 的局部覆盖层。只能增加该作者的加载、边界和差异性规则，不能复制或削弱共享状态机、事实和出版门。
-
-## `derived-author-memory/`
-
-派生作者自己的长期记忆，不属于源作者研究。
-
-### `author-writing-memory.md`
-
-记录已经批准的写作历史、稳定编辑经验和有意发展的作者特征。
-
-### `editorial-review-memory.md`
-
-记录多次审校中反复出现的问题、已经接受的修正和被拒绝的习惯。
-
-### `knowledge-growth-log.md`
-
-记录通过已审核 research pack 获得的新知识。知识增长不自动等于人格或文风改变。
-
-### `publication-history.jsonl`
-
-机器可读的出版历史，关联 publication ID、work-item ID、状态和路径。
-
-## `derived-author-writing-work-items/README.md`
-
-说明此处只放该作者视角的索引或快捷入口；正式、完整的任务包仍以根级 `writing-work-items/` 为准。
-
-## `derived-author-evaluations/README.md`
-
-说明该作者需要接受哪些专属评测，例如身份一致性、源作者泄漏、原创性、事实性和与另一个派生作者的区别。
-
-## `derived-author-publications/README.md`
-
-说明这里可以组织某个派生作者的出版视图，但正式 canonical 文件仍在根级 `approved-publications/`。
+完整新 persona 由 `shared-writing-harness/scaffold-templates/derived-author-persona-template/template-manifest.json` 和 `create_new_derived_author_persona.py` 生成。
 
 ---
 
-# 九、`shared-writing-harness/`：共享写作控制系统
+# 八、`shared-writing-harness/`：共享执行控制
 
-Harness 负责“怎样运行工作”，不负责“作者是谁”。所有派生作者共享状态、合同、审核和出版门，可以用 overlay 添加差异，但不能复制整套管线。
-
-## `shared-writing-harness/README.md`
-
-说明机器合同、prompt、runbook、政策和模板的总体分工。
-
-## `shared-writing-harness/AGENTS.md`
-
-要求合同保持确定性和作者中立，schema 变化必须同步例子与测试，派生作者 overlay 不得削弱出版规则。
+| 路径 | 职责 |
+|---|---|
+| `README.md` | contracts、runbooks、prompts、policies 与 templates 总览。 |
+| `AGENTS.md` | harness 的 canonical responsibilities、controlled repetition 与 contract-change 规则。 |
 
 ## `machine-readable-contracts/`
 
-所有跨 agent、脚本和 runtime 交换的数据结构。
+`README.md` 解释 schema 是稳定接口。`document-schema-registry.json` 将生产型 machine documents 映射到 schema；未注册文件会失败。
 
-### `README.md`
+### Project / repository
 
-说明这些 JSON Schema 是稳定接口，不是普通文档。
+- `author-lab-project-manifest.schema.json`
+- `repository-component-status-register.schema.json`
+- `repository-placeholder-register.schema.json`
+- `publication-site-configuration.schema.json`
 
-### `author-lab-project-manifest.schema.json`
+### Source evidence / research / model
 
-验证根级项目 manifest 的项目 ID、类型和主要目录字段。
+- `source-author-profile.schema.json`
+- `source-rights-record.schema.json`
+- `source-material-storage-record.schema.json`
+- `source-corpus-record.schema.json`
+- `source-segment-location-record.schema.json`
+- `research-claim-evidence-record.schema.json`
+- `source-author-model-manifest.schema.json`
+- `source-author-model-provenance-record.schema.json`
+- `author-model-loading-map.schema.json`
 
-### `source-author-profile.schema.json`
+### Derived authors
 
-验证源作者资料文件的 ID、显示名、对象类型、语言、corpus 和权利位置。
+- `derived-author-persona-manifest.schema.json`
+- `derived-author-lineage.schema.json`
+- `derived-author-model-manifest.schema.json`
+- `derived-author-persona-template-manifest.schema.json`
+- `derived-author-publication-history-record.schema.json`
+- `derived-author-work-item-index-record.schema.json`
+- `derived-author-publication-index-record.schema.json`
 
-### `source-corpus-record.schema.json`
+### Work items / runtime / review
 
-验证 corpus 每条来源记录的 source ID、类型、标题、文件、规范化路径、权利和校验值。
+- `writing-runbook-manifest.schema.json`
+- `writing-work-item-state.schema.json`
+- `writing-run-manifest.schema.json`
+- `work-item-source-record.schema.json`
+- `factual-review-result.schema.json`
+- `style-review-result.schema.json`
+- `runtime-adapter-configuration.schema.json`
 
-### `source-author-model-manifest.schema.json`
+### Evaluation / experiment / publication
 
-验证源作者模型 ID、源作者 ID、版本和 provenance。
-
-### `derived-author-persona-manifest.schema.json`
-
-验证派生作者 ID、显示名、persona 类型、lineage 和模型目录。
-
-### `derived-author-lineage.schema.json`
-
-验证上游模型、角色、设计权重和三个必须为 false 的冒充边界。
-
-### `writing-runbook-manifest.schema.json`
-
-验证 runbook ID、版本、必需阶段、可选阶段和必需工件。
-
-### `writing-work-item-state.schema.json`
-
-验证 work-item ID、派生作者、状态、模型版本、runbook、runtime 和三类审核状态。
-
-### `writing-run-manifest.schema.json`
-
-验证一次具体模型运行的 run ID、work item、runtime、模型、时间和加载文件。
-
-### `factual-review-result.schema.json`
-
-验证事实审核结果，以及每条 claim 的类型、支持状态、来源和 as-of 日期。
-
-### `style-review-result.schema.json`
-
-验证 persona consistency、source fidelity、source leakage、originality 和 cross-persona distinction 等指标。
-
-### `runtime-adapter-configuration.schema.json`
-
-验证 runtime ID、类型、配置版本、模型、上下文、工具和环境变量。
-
-### `evaluation-result.schema.json`
-
-验证独立评测的对象、类型、分数、评测者和说明。
-
-### `publication-record.schema.json`
-
-验证正式出版记录的 publication ID、work item、作者、标题、状态、canonical 文件和时间。
+- `evaluation-result.schema.json`
+- `author-model-experiment-manifest.schema.json`
+- `experiment-runtime-run-record.schema.json`
+- `experiment-evaluation-result.schema.json`
+- `experiment-aggregate-analysis.schema.json`
+- `publication-record.schema.json`
+- `policy-rule-record.schema.json`
 
 ## `task-prompts/`
 
-每个阶段的职责提示，不包含派生作者人格。
+- `README.md` — prompt 只定义阶段输出，作者身份来自 persona。
+- `source-research-stage-prompt.md`
+- `structured-planning-stage-prompt.md`
+- `complete-drafting-stage-prompt.md`
+- `factual-review-stage-prompt.md`
+- `style-review-stage-prompt.md`
+- `editorial-revision-stage-prompt.md`
+- `publication-preparation-stage-prompt.md`
 
-### `README.md`
-
-说明 prompt 只定义任务和输出，作者身份从选定 persona 目录加载。
-
-### `source-research-stage-prompt.md`
-
-指导建立 research pack，区分确认事实、报道、官方说法、分析推断和未解决问题。
-
-### `structured-planning-stage-prompt.md`
-
-指导建立文章核心问题、判断、证据顺序、段落功能、风险和结尾策略。
-
-### `complete-drafting-stage-prompt.md`
-
-指导依据批准计划完整写稿，并禁止虚构事实、场景、引语、关系和源作者经验。
-
-### `factual-review-stage-prompt.md`
-
-指导提取 claim、分类、核查支持和日期，并输出符合 schema 的结果。
-
-### `style-review-stage-prompt.md`
-
-指导评估派生作者一致性、上游特征继承、泄漏、原创性和跨作者区别。
-
-### `editorial-revision-stage-prompt.md`
-
-指导仅依据记录的事实、风格和编辑意见生成新版本，不覆盖历史草稿。
-
-### `publication-preparation-stage-prompt.md`
-
-指导检查批准门、生成元数据、复制 canonical 文件并更新出版 manifest。
+关键 prompt 引用 canonical policy IDs，不重新定义政策。
 
 ## `writing-runbooks/`
 
-Runbook 决定一种任务需要哪些阶段和工件。
+- `README.md` — runbook 不选择作者或实际模型。
+- `standard-researched-essay/README.md` + `writing-runbook-manifest.json`
+- `deep-research-article/README.md` + `writing-runbook-manifest.json`
+- `short-public-commentary/README.md` + `writing-runbook-manifest.json`
+- `authorized-life-writing/README.md` + `writing-runbook-manifest.json`
+- `style-preserving-rewrite/README.md` + `writing-runbook-manifest.json`
 
-### `README.md`
-
-说明 runbook 不选择具体模型，也不编码作者人格。
-
-### `standard-researched-essay/README.md`
-
-标准有研究散文的用途说明。
-
-### `standard-researched-essay/writing-runbook-manifest.json`
-
-要求 intake、research、planning、drafting、事实审核、风格审核、编辑审核和出版准备，并列出必需文件。
-
-### `deep-research-article/README.md`
-
-长篇、重资料研究文章的用途说明。
-
-### `deep-research-article/writing-runbook-manifest.json`
-
-增加 research review、可选第二轮事实审核和更完整的来源记录。
-
-### `short-public-commentary/README.md`
-
-短公共评论的用途说明，篇幅短但事实、人格和编辑门仍不可跳过。
-
-### `short-public-commentary/writing-runbook-manifest.json`
-
-定义短评论的阶段和必需工件。
-
-### `authorized-life-writing/README.md`
-
-使用用户明确提供的生活事件和私人笔记时使用，重点是场景授权而不是广泛网络研究。
-
-### `authorized-life-writing/writing-runbook-manifest.json`
-
-要求 scene authorization，并列出授权场景文件、计划、草稿和审核结果。
-
-### `style-preserving-rewrite/README.md`
-
-用于在保持意义与授权事实的情况下重写已有文本。
-
-### `style-preserving-rewrite/writing-runbook-manifest.json`
-
-要求 source-text analysis、semantic review 和 style review，不默认进行开放式研究。
+每个 manifest 是 stages、required artifacts、artifact templates 与 policy IDs 的唯一权威来源。
 
 ## `harness-policies/`
 
-所有 runbook 和派生作者都必须服从的共享规则。
-
-### `factuality-and-claim-classification-policy.md`
-
-要求外部真值 claim 分成 verified fact、reported claim、analysis inference、literary construction 或 unsupported speculation。
-
-### `citation-and-source-quality-policy.md`
-
-强调来源质量、独立性和对具体 claim 的直接支持，禁止以来源数量替代可靠性。
-
-### `derived-author-boundaries-and-source-leakage-policy.md`
-
-规定派生作者可以继承关系和方法，但不能借用源作者身份、私生活、原句和权威。
-
-### `originality-and-non-copying-policy.md`
-
-要求检查对源文本、校准例子、旧文章和其他派生作者的文本及结构重复。
-
-### `editorial-review-and-publication-gates-policy.md`
-
-规定事实审核、风格审核、编辑批准、元数据和仓库验证是正式出版的硬门。
+- `factuality-and-claim-classification-policy.md`
+- `citation-and-source-quality-policy.md`
+- `derived-author-boundaries-and-source-leakage-policy.md`
+- `originality-and-non-copying-policy.md`
+- `editorial-review-and-publication-gates-policy.md`
+- `policy-rule-register.jsonl` — canonical policy IDs、规范文件、摘要和 enforcement scope。
 
 ## `artifact-templates/`
 
-新 work item 生成标准文件时使用的空白结构。
+- `writing-brief-template.md`
+- `research-pack-template.md`
+- `article-plan-template.md`
+- `editor-review-template.md`
+- `final-publication-metadata-template.json`
+- `article-draft-template.md`
+- `final-approved-article-template.md`
+- `factual-review-result-template.json`
+- `style-review-result-template.json`
+- `work-item-source-register-template.jsonl`
+- `authorized-scene-details-template.md`
+- `authorized-source-text-template.md`
+- `semantic-review-result-template.md`
 
-### `writing-brief-template.md`
+Templates 可以包含未解析变量，因此在 schema registry 中显式分类为 artifact templates；生成后的 runtime 文件必须通过对应 schema。
 
-包含任务、作者、文类、篇幅、受众、核心问题、材料、禁区和出版目的地。
+## `scaffold-templates/`
 
-### `research-pack-template.md`
-
-包含确认事实、报道、官方说法、推断、冲突、时效、开放问题和来源 register。
-
-### `article-plan-template.md`
-
-包含核心问题、初步判断、作者特定思维运动、证据顺序、段落功能、风险和结尾。
-
-### `editor-review-template.md`
-
-包含编辑决定、事实、人格、结构、必改项和出版说明。
-
-### `final-publication-metadata-template.json`
-
-为正式出版记录提供机器可读字段模板。
+- `derived-author-persona-template/template-manifest.json` — 完整 persona 必需目录、路径、Markdown 文件和默认 genre modes。
 
 ---
 
-# 十、`agent-skills/`：供 agent 调用的薄能力层
+# 九、`agent-skills/`：轻量角色入口
 
-Skill 只说明一个角色如何加载现有资产并执行任务，不能复制完整作者研究和 harness。
-
-## `agent-skills/README.md`
-
-说明 skills 是轻量入口。
-
-## `source-author-researcher/SKILL.md`
-
-指导研究员加载源作者 profile、manifest、规范化段落、研究方法和证据 register，并输出有证据和反例的研究 claim。
-
-## `derived-author-writer/SKILL.md`
-
-指导 writer 加载选定 persona、lineage、derivation、core、genre mode、brief、research pack 和 runbook；禁止加载 held-out evals 和其他作者记忆。
-
-## `factual-claim-reviewer/SKILL.md`
-
-指导独立事实审查，不受文风偏好影响，输出 factual review schema。
-
-## `derived-author-style-reviewer/SKILL.md`
-
-指导文风审查，评估人格一致性、继承、泄漏、原创性和跨作者区别，不静默修理事实。
-
-## `approved-publication-preparer/SKILL.md`
-
-指导 publisher 验证所有状态门、建立元数据、复制 canonical 文件、更新 manifest 并运行验证。
+| 文件 | 职责 |
+|---|---|
+| `README.md` | skills 只负责加载和执行，不复制研究或 harness。 |
+| `source-author-researcher/SKILL.md` | 读取版本化证据并写 research claims；引用 `POLICY-PROVENANCE-001`。 |
+| `derived-author-writer/SKILL.md` | 按 work item 加载一个 persona/mode/runbook；禁止 held-out 和跨 persona memory。 |
+| `factual-claim-reviewer/SKILL.md` | 独立 claim 分类与事实支持审核。 |
+| `derived-author-style-reviewer/SKILL.md` | persona consistency、leakage、originality 与 distinction 审核。 |
+| `approved-publication-preparer/SKILL.md` | 只能通过 transactional publication command 发布。 |
 
 ---
 
-# 十一、`runtime-adapters/`：执行环境配置
+# 十、`runtime-adapters/`：执行环境
 
-更换 OpenClaw、ChatGPT、Codex、Claude Code 或本地模型时，只改变 runtime 层，不改变作者身份。
+`runtime-adapters/README.md` 规定 adapter 不携带作者知识。
 
-## `runtime-adapters/README.md`
+每个目录包含 `README.md` 和 `runtime-adapter-configuration.json`：
 
-说明 adapter 的边界和用途。
+- `chatgpt-runtime-adapter/`
+- `openclaw-runtime-adapter/`
+- `codex-runtime-adapter/`
+- `claude-code-runtime-adapter/`
+- `local-command-line-runtime-adapter/`
 
-每个 runtime 子目录都包含：
-
-- `README.md`：说明该环境怎样加载文件、使用工具、运行命令和处理权限；
-- `runtime-adapter-configuration.json`：机器配置，包括 ID、类型、版本、默认模型、上下文、工具能力和环境变量。
-
-具体目录：
-
-- `openclaw-runtime-adapter/`：OpenClaw profiles、模型路由、workspace 和工具映射；
-- `chatgpt-runtime-adapter/`：ChatGPT 的文件、Web、GitHub 和分析工具使用方式；
-- `codex-runtime-adapter/`：Codex 的本地仓库、worktree、测试和 PR 流程；
-- `claude-code-runtime-adapter/`：Claude Code 的仓库规则、权限、加载和验证；
-- `local-command-line-runtime-adapter/`：本地模型或 API 客户端命令行环境，密钥保存在 Git 之外。
+Configuration 记录 runtime ID/type/version、default model、context window、tool capabilities 和环境变量。当前这些 adapter 是示例或 scaffold；没有一个被虚假标记为已完成跨 runtime 实验验证。
 
 ---
 
-# 十二、`author-model-evaluations/`：独立评测
+# 十一、`author-model-evaluations/`：测量方法
 
-评测不只是“像不像源作者”，还要判断派生作者是否形成自己、是否泄漏和是否原创。
-
-## `README.md`
-
-说明六个核心指标和 held-out 隔离原则。
+| 路径 | 职责 |
+|---|---|
+| `README.md` | 六类核心指标与 held-out 隔离。 |
 
 ## `evaluation-rubrics/`
 
-### `source-trait-fidelity-rubric.md`
+- `source-trait-fidelity-rubric.md`
+- `independent-persona-consistency-rubric.md`
+- `source-author-leakage-rubric.md`
+- `originality-and-non-copying-rubric.md`
+- `cross-persona-distinction-rubric.md`
+- `factuality-and-scene-authorization-rubric.md`
 
-只评估 derivation profile 中明确计划继承或改造的特征，不追求最大相似。
+## Evaluation case directories
 
-### `independent-persona-consistency-rubric.md`
-
-评估派生作者的议题、推理、知识、情绪和文风是否跨任务稳定。
-
-### `source-author-leakage-rubric.md`
-
-评估身份、生平、私人经验、原句、权威和过度文本近似的泄漏。
-
-### `originality-and-non-copying-rubric.md`
-
-评估句子复用、结构自复制、对校准样本和旧文章的依赖。
-
-### `cross-persona-distinction-rubric.md`
-
-在同一 brief 和 research pack 下比较 B/C 是否在注意、框架、节奏、文类和结尾上真正不同。
-
-### `factuality-and-scene-authorization-rubric.md`
-
-评估 claim 支持、日期限定、来源质量、虚构引语、自传和场景授权。
-
-## `calibration-evaluation-cases/README.md`
-
-存放开发期间可见的校准题，不与 held-out 混用。
-
-## `held-out-evaluation-cases/README.md`
-
-存放 writer 不得读取的正式评测题和样本，防止评测变成背题。
-
-## `adversarial-evaluation-cases/README.md`
-
-存放诱导冒充、虚构经历、复制原句、作者坍缩和绕过出版门的压力测试。
-
-## `runtime-comparison-reports/README.md`
-
-在同一模型版本、runbook、research pack 和 eval case 下比较不同 runtime，记录模型、上下文、工具和成本。
+- `calibration-evaluation-cases/README.md` — 开发期可见题。
+- `held-out-evaluation-cases/README.md` — 只说明接口；真实 held-out 内容不在 writer repo。
+- `adversarial-evaluation-cases/README.md` — 冒充、泄漏、伪造与 gate bypass 压力测试。
+- `runtime-comparison-reports/README.md` — 同条件比较 runtime。
 
 ---
 
-# 十三、`derived-author-comparisons/`：作者之间的受控比较
+# 十二、`author-model-experiments/`：正式实验对象
 
-比较报告是评测资产，不能反向成为写作 prompt。
+| 路径 | 职责 |
+|---|---|
+| `README.md` | 区分 experiment、work item 与 evaluation。 |
+| `AGENTS.md` | blind evaluation、held-out 隔离、失败记录保留。 |
 
-## `README.md`
+## `experiment-scaffold-template/`
 
-说明比较目的和边界。
+- `experiment-manifest.json` — hypothesis 路径、controlled execution、四个 conditions、held-out URI、run/result/conclusion 路径。
+- `hypothesis.md` — 第一轮 B/C distinction 假设模板。
+- `controlled-inputs/README.md` — common brief、research pack 和 task set；不放 held-out。
+- `runtime-run-records/README.md` — 每 condition/repetition 的 immutable run record 要求。
+- `failure-cases/README.md` — leakage、fabrication、persona collapse、evaluator disagreement 与 exclusions。
+- `raw-evaluation-results.jsonl` — blind code、evaluator、scores 与 notes；sample 状态为 not-run。
+- `aggregate-analysis.json` — condition summary、agreement、excluded/failure counts 与 conclusion support。
+- `experiment-conclusion.md` — 只有 raw results 与 aggregate analysis 存在后才能写。
 
-## `source-author-model-versus-derived-author-sample-b/README.md`
+标准四条件：
 
-记录 A 模型到 B 的计划继承、改造、拒绝、泄漏风险和独立特征。
+- generic runtime baseline；
+- source-model-direct baseline；
+- Derived Author B；
+- Derived Author C。
 
-## `source-author-model-versus-derived-author-sample-c/README.md`
-
-记录 A 模型到 C 的计划继承、改造、拒绝、泄漏风险和独立特征。
-
-## `derived-author-sample-b-versus-derived-author-sample-c/README.md`
-
-比较 B/C 的议题、角色、推理、知识、节奏、文类、记忆和同题输出差异。
+共享 controlled execution 记录 runtime/runbook 版本、model parameters、context budget、tool permissions、repetition count 与 randomness control。
 
 ---
 
-# 十四、`writing-work-items/`：一次写作的完整工作包
+# 十三、`derived-author-comparisons/`：受控比较报告
 
-这里是实际生产中心。所有过程文件都围绕一个 work-item ID 放在同一目录，而不是分散在全仓库的 `_drafts`、`plans` 和 `reviews` 中。
+- `README.md` — 比较报告是 evaluation asset，不是写作 prompt。
+- `source-author-model-versus-derived-author-sample-b/README.md`
+- `source-author-model-versus-derived-author-sample-c/README.md`
+- `derived-author-sample-b-versus-derived-author-sample-c/README.md`
 
-## `writing-work-items/README.md`
+---
 
-说明每个工作项必须包含状态、brief、run、research、来源、计划、草稿、事实审核、文风审核、编辑审核和最终稿。
+# 十四、`writing-work-items/`：具体生产中心
 
-## `writing-work-items/AGENTS.md`
-
-规定先读状态文件、草稿不可覆盖、审核门不可跳过、每次模型运行都必须记录。
-
-## `2026-writing-work-items/`
-
-按年份组织工作项。年份只用于归档，不改变状态机。
+| 路径 | 职责 |
+|---|---|
+| `README.md` | 一个 work item 一个完整目录。 |
+| `AGENTS.md` | 先读 state、草稿不可覆盖、gate 不可跳过、run 必须记录。 |
+| `2026-writing-work-items/` | 年度归档容器，不改变状态机。 |
 
 ## `2026-001-sample-article/`
 
-一个完整样例工作包。
-
-### `work-item-state.json`
-
-整个任务的机器权威状态。记录作者、模型版本、runbook、runtime、三类审核和出版关联。程序决定能否继续时读取它，而不是从自然语言猜测。
-
-### `writing-brief.md`
-
-编辑或 operator 给出的任务定义，包括作者、文类、目的、受众、材料和禁区。
-
-### `writing-run-manifest.json`
-
-记录一次具体模型运行：run ID、runtime、模型、开始结束时间和实际加载文件。重跑时创建新记录或扩展为 run 历史，不覆盖事实。
-
-### `research-pack.md`
-
-该文章专用的事实与分析材料。它与源作者研究不同，关注当前选题和时效性事实。
-
-### `work-item-source-register.jsonl`
-
-该文章实际使用来源的机器清单，供事实审核和出版追踪。
-
-### `article-plan.md`
-
-文章结构和论证计划，包括判断、证据顺序、段落功能、风险和结尾。
-
-### `draft-01.md`
-
-第一版完整草稿，保留不覆盖。
-
-### `draft-02-after-review.md`
-
-根据审核形成的第二版，文件名说明版本与来源。
-
-### `factual-review-result.json`
-
-结构化事实审核结果。状态必须与 `work-item-state.json` 一致。
-
-### `style-review-result.json`
-
-结构化派生作者和文风审核结果，包括一致性、继承、泄漏、原创和区分度。
-
-### `editor-review.md`
-
-人类编辑的决定和修改意见。编辑批准是机器自审无法替代的外部门。
-
-### `final-approved-article.md`
-
-最终候选文件名。只有状态变为 `approved` 且编辑批准后，它才真正是 approved；文件名本身不赋予权限。
+- `work-item-state.json` — lifecycle、stage executions、quality gates、persona/model/runbook/runtime 版本与 publication。
+- `writing-brief.md` — 任务、受众、目的、材料、禁区和出版目标。
+- `writing-run-manifest.json` — sample 明确为 not-run；真实 run 必须记录 commit、版本、参数、context、工具、loaded file hashes、outputs 和 exit status。
+- `research-pack.md` — 当前文章事实与分析材料。
+- `work-item-source-register.jsonl` — 当前文章使用来源。
+- `article-plan.md` — 判断、证据顺序、段落功能、风险和结尾。
+- `draft-01.md` — 第一版不可覆盖草稿。
+- `draft-02-after-review.md` — 审核后新版本。
+- `factual-review-result.json` — 结构化事实审核。
+- `style-review-result.json` — persona/style/leakage/originality/distinction 审核。
+- `editor-review.md` — 人类编辑决定。
+- `final-approved-article.md` — 只有 state/gates 批准后才具有 approved 意义。
 
 ---
 
-# 十五、`approved-publications/`：正式出版物
+# 十五、`approved-publications/`：canonical 出版物
 
-这里保存经过批准的 canonical 内容，不与网站生成器绑定。
+| 路径 | 职责 |
+|---|---|
+| `README.md` | 只有 gate 通过内容可以进入。 |
+| `AGENTS.md` | 强制 transactional publication。 |
+| `approved-publication-manifest.jsonl` | canonical publication 索引；当前只有 withdrawn sample placeholder。 |
+| `researched-essays/README.md` | 研究型散文分类。 |
+| `short-public-commentaries/README.md` | 短公共评论分类。 |
+| `authorized-life-writing/README.md` | 场景授权生活写作。 |
+| `book-length-projects/README.md` | canonical manuscript 与版本元数据。 |
+| `editorial-collections/README.md` | 专题集、选集与编排关系。 |
 
-## `README.md`
-
-说明只有审核通过内容可以进入，以及出版物不能反向证明源作者。
-
-## `AGENTS.md`
-
-规定写入前检查 work-item 状态和三类审核，并原子更新 manifest。
-
-## `approved-publication-manifest.jsonl`
-
-所有正式出版物的机器索引。样板中的 withdrawn 记录用于维持示例格式，不代表真实发布。
-
-## `researched-essays/README.md`
-
-正式研究型散文的 canonical 存储区说明。
-
-## `short-public-commentaries/README.md`
-
-正式短评论存储区说明。
-
-## `authorized-life-writing/README.md`
-
-正式生活写作存储区说明，必须保留场景授权和非虚构边界。
-
-## `book-length-projects/README.md`
-
-书稿和版本元数据存储区说明。保存 canonical manuscript，不保存可重复生成的 EPUB/PDF 构建产物。
-
-## `editorial-collections/README.md`
-
-专题集、选集和编排关系存储区说明。应引用 canonical 文章而不是复制多份正文。
+正式发布只能通过 `publish_approved_writing_work_item.py`。`build_approved_publication_manifest.py` 也会重新执行 publication gate，而不只是汇总 metadata。
 
 ---
 
-# 十六、`publication-site/`：展示层
+# 十六、`publication-site/`：可选展示层
 
-## `publication-site/README.md`
+- `README.md` — 网站只读取 approved publications，不控制研究结构。
+- `publication-site-configuration.json` — site ID、generator、canonical directory、output 与允许状态。
 
-说明网站只是从 `approved-publications/` 读取内容的一种展示方式。更换 Jekyll、Astro 或其他生成器不应改变研究、模型和出版目录。
-
-## `publication-site/publication-site-configuration.json`
-
-记录 site ID、生成器、canonical 出版目录、生成输出目录和允许进入网站的 publication 状态。
+当前为 Optional / Example，不属于第一场作者模型实验的必要核心。
 
 ---
 
-# 十七、`repository-automation-scripts/`：仓库自动化
+# 十七、`repository-automation-scripts/`：执行与验证工具
 
-## `README.md`
-
-说明脚本负责结构、文档、状态、脚手架、规范化和出版索引。
-
-## `validate_author_lab_repository_structure.py`
-
-检查关键目录和入口文件是否存在。它验证骨架，不验证内容质量。
-
-## `validate_json_and_jsonl_documents.py`
-
-遍历仓库并解析所有 JSON/JSONL，发现语法损坏和非法行。
-
-## `validate_sample_comment_markers.py`
-
-检查所有受管文本文件是否包含指定 sample 注释，并排除缓存、构建和环境目录。真实内容完成后可以按计划移除该验证要求。
-
-## `validate_writing_work_item_state.py`
-
-执行状态机硬规则：进入 fact-checked 以后必须事实通过，进入 style-reviewed 以后必须风格通过，进入 approved 以后必须编辑批准，published 必须有出版信息。
-
-## `create_new_derived_author_persona.py`
-
-根据 kebab-case ID、显示名和上游模型信息建立新派生作者骨架。它只创建框架，不替代真正的人格研究与设计。
-
-## `create_new_writing_work_item.py`
-
-根据 work-item ID、派生作者、模型版本、runbook 和 runtime 创建新任务包及初始状态。
-
-## `build_approved_publication_manifest.py`
-
-扫描正式出版元数据并重建 publication manifest。它只收录合法状态，不能将草稿自动批准。
-
-## `normalize_authorized_plain_text_source.py`
-
-将已经授权的纯文本统一换行、清理空行并加入稳定段落 ID。它不是 EPUB/PDF 全功能解析器。
+| 文件 | 职责 |
+|---|---|
+| `README.md` | 脚本总览与使用边界。 |
+| `validate_author_lab_repository_structure.py` | 按 project manifest 与 persona template 验证必需路径。 |
+| `validate_json_and_jsonl_documents.py` | 基础 JSON/JSONL 语法。 |
+| `validate_machine_readable_contracts.py` | registry-driven JSON Schema；拒绝未注册 machine documents。 |
+| `validate_repository_cross_references.py` | source、model、persona、runbook、runtime、work item、experiment、publication 的 ID/version/path/artifact 关系。 |
+| `validate_source_research_and_model_provenance.py` | segment → research claim → source-model rule/model file。 |
+| `validate_policy_rule_references.py` | 扫描未知 policy IDs。 |
+| `validate_writing_work_item_state.py` | lifecycle、stage 与 gate 关系。 |
+| `validate_writing_run_reproducibility.py` | completed run 的版本、loaded file hash 与 output artifact。 |
+| `validate_sample_comment_markers.py` | reference-sample / active-author-lab 双模式 placeholder。 |
+| `create_new_derived_author_persona.py` | 从 complete persona template 生成完整 persona。 |
+| `create_new_writing_work_item.py` | 从 runbook、persona model 和 runtime 生成完整 work item。 |
+| `create_new_author_model_experiment.py` | 建立四条件 controlled experiment scaffold。 |
+| `rebuild_derived_author_indexes.py` | 从 canonical work/publication 重建 persona indexes。 |
+| `normalize_authorized_plain_text_source.py` | 生成 versioned segments 与 location map。 |
+| `publication_gate_support.py` | publication 共享验证、manifest serialization 与 gate helpers。 |
+| `publish_approved_writing_work_item.py` | staging、canonical copy、metadata、manifest/state 更新和 rollback。 |
+| `build_approved_publication_manifest.py` | 验证 metadata 与 gates 后重建 manifest。 |
 
 ---
 
-# 十八、`repository-validation-tests/`：自动化测试
+# 十八、`repository-validation-tests/`：行为回归测试
 
-## `README.md`
+- `README.md` — 测试范围说明。
+- `test_repository_structure_validation.py`
+- `test_json_and_jsonl_document_validation.py`
+- `test_machine_readable_contract_validation.py`
+- `test_pre_real_run_contracts.py`
+- `test_sample_comment_marker_validation.py`
+- `test_writing_work_item_state_machine.py`
+- `test_authorized_plain_text_normalization.py`
+- `test_author_model_experiment_scaffolding.py`
+- `test_transactional_publication_gate.py`
+- `test_derived_author_index_rebuilding.py`
+- `test_policy_rule_references.py`
+- `test_runbook_driven_work_item_scaffolding.py`
+- `test_complete_derived_author_persona_scaffolding.py`
+- `test_source_research_and_model_provenance_validation.py`
+- `test_writing_run_reproducibility_validation.py`
 
-说明测试覆盖结构、机器文档、sample 标记、状态机和文本规范化。
-
-## `test_repository_structure_validation.py`
-
-验证所有关键路径存在。
-
-## `test_json_and_jsonl_document_validation.py`
-
-通过子进程运行机器文档解析脚本并检查返回码。
-
-## `test_sample_comment_marker_validation.py`
-
-验证当前 sample 阶段所有文件都带指定注释。
-
-## `test_writing_work_item_state_machine.py`
-
-验证合法 editor-review 状态能够通过，并验证缺少编辑批准与 publication 的 published 状态会失败。
-
-## `test_authorized_plain_text_normalization.py`
-
-验证规范化脚本产生稳定段落 ID。
+这些测试覆盖“合同是否真的影响行为”，而不只检查文件存在。
 
 ---
 
-# 十九、`.github/`：GitHub 协作与持续集成
+# 十九、`.github/`：协作与 CI
 
-## `.github/workflows/validate-author-lab-repository.yml`
-
-在 push、PR 和手动触发时安装 Python，依次运行结构、JSON/JSONL、work-item 状态、sample 标记和 pytest。任何一步失败都不应合并。
-
-## `.github/CODEOWNERS`
-
-指定默认和关键目录的代码所有者。真实团队可以把研究、模型、出版和工程目录分配给不同负责人。
-
-## `.github/PULL_REQUEST_TEMPLATE.md`
-
-要求 PR 标明变更属于 corpus、研究、模型、派生作者、harness、work item、出版或自动化，并确认相应证据和测试。
-
-## `.github/ISSUE_TEMPLATE/source-author-research-claim.yml`
-
-用于提出或修订源作者研究 claim，强制填写主张、支持与反例证据、置信度。
-
-## `.github/ISSUE_TEMPLATE/derived-author-model-change.yml`
-
-用于提出派生作者身份、谱系、模型或边界变更，要求说明对继承、改造、拒绝和原创的影响。
-
-## `.github/ISSUE_TEMPLATE/repository-validation-problem.yml`
-
-用于报告 schema、状态机、脚本和目录验证问题，要求提供完整命令输出和预期行为。
+| 路径 | 职责 |
+|---|---|
+| `.github/workflows/validate-author-lab-repository.yml` | 依次运行结构、语法、schema、cross-reference、provenance、policy、state、run reproducibility、placeholder 和 pytest。 |
+| `.github/CODEOWNERS` | 关键目录责任人。 |
+| `.github/PULL_REQUEST_TEMPLATE.md` | 变更层次、证据、schema/test 和验证确认。 |
+| `.github/ISSUE_TEMPLATE/source-author-research-claim.yml` | 提出或修订 research claim。 |
+| `.github/ISSUE_TEMPLATE/derived-author-model-change.yml` | persona/lineage/model/boundary 变更。 |
+| `.github/ISSUE_TEMPLATE/repository-validation-problem.yml` | schema、validator、state 与 CI 问题。 |
 
 ---
 
-# 二十、不同角色应该怎样读取仓库
+# 二十、角色读取路径
 
-## Source corpus curator
+## Corpus curator
 
-按顺序读取：
-
-1. `RIGHTS-AND-LICENSING-POLICY.md`
-2. 根 `AGENTS.md`
-3. `source-authors/<source-author>/AGENTS.md`
-4. `source-author-profile.json`
-5. `source-corpus-manifest.jsonl`
-6. `source-rights-register.jsonl`
-7. 相应原始材料类型的 `README.md`
-
-输出是新的 source record、权利记录和规范化材料，不直接修改研究结论。
+`RIGHTS-AND-LICENSING-POLICY.md` → root/source AGENTS → profile → corpus/rights/storage registers → material-type README → normalization script。
 
 ## Source-author researcher
 
-读取 corpus manifest、规范化段落、研究方法、证据政策和研究目录。输出研究 Markdown、claim register 和综合报告，不直接修改派生作者。
+Profile → corpus manifest → versioned segment maps → research methodology → evidence register。输出 claim、counterexample、confidence；不得读取 derived output 作为证据。
 
 ## Source-model curator
 
-读取已接受 research claim、综合报告、limitations 和 provenance。输出版本化 source-author model、load map 和 provenance register。
+Accepted claims → comprehensive report/limitations → provenance register → source model core/modes/load map。
 
 ## Derived-author designer
 
-读取源作者模型、派生方法、伦理政策和其他作者比较目标。输出 persona manifest、lineage、五类 derivation 文件和独立 author model。
+Source model → derivation methodology → complete persona template → lineage/derivation/core/modes/boundaries。
 
 ## Writer
 
-只读取：选定派生作者 manifest、lineage、derivation、load map 指定 core、一个 genre mode、一个 runbook、当前 brief 和 research pack。writer 不读 held-out evals，也不读另一个作者记忆。
+Work-item state → selected persona manifest/lineage/derivation → load map core + one genre → runbook → brief/research/source register。禁止 held-out 与其他 persona memory。
 
 ## Factual reviewer
 
-读取 draft、research pack、source register、事实政策和 schema。尽量不加载风格提示，以保持事实判断独立。
+Draft → research pack/source register → factuality policy/schema；不加载不必要的 style prompt。
 
 ## Style reviewer
 
-读取 draft、派生作者模型、derivation profile、风格 rubric 和对照目标。不得通过改变事实来“修好文风”。
+Draft → selected persona/derivation/model → rubrics；不修改事实，不读取 held-out 作为写作提示。
 
 ## Editor
 
-读取整个 work item、两份结构化审核和必要的作者模型。编辑决定写入 `editor-review.md` 和状态文件。
+完整 work item、两类 review、必要 persona/model；写 editor review 并决定 gate。
 
 ## Publisher
 
-只接受 `approved` 的工作项，核对三类审核、最终稿和元数据，复制到 `approved-publications/` 并更新 manifest。
+只调用 transactional publication command；不手工复制正文。
+
+## Evaluator
+
+读取 blind pack、rubrics、outputs；真实 held-out 位于 evaluator-only storage。
 
 ## Runtime maintainer
 
-只修改 `runtime-adapters/`、脚本、依赖和 CI。不能把模型偏好写进作者人格，也不能为了 runtime 方便削弱出版门。
+修改 adapters、execution records、tools、CI；不得修改作者身份以适配 runtime。
 
 ---
 
-# 二十一、四种常见新增工作的标准做法
+# 二十一、四类新增工作的标准顺序
 
-## 新增一个真实源作者
+## 新增真实源作者
 
-1. 在 `source-authors/` 下创建新的描述性目录；
-2. 建立 profile、bibliography、rights register 和 corpus manifest；
-3. 登记原始与二手材料；
-4. 生成规范化文本与位置映射；
-5. 在 `source-author-research/` 建立对应研究目录；
-6. 研究成熟后才在 `source-author-models/` 建立版本化模型；
-7. 更新根 project manifest；
-8. 运行全部验证。
+1. 创建 source-author 目录、profile、bibliography、rights 和 corpus manifest；
+2. 把原始材料登记到 external storage；
+3. 记录 checksum、rights 与 ingestion；
+4. 生成 versioned normalized text 与 segment map；
+5. 建立 research directory 和 claim register；
+6. claim 通过后建立 source model 与 provenance；
+7. 更新 project manifest/component status；
+8. 运行完整 CI。
 
-## 新增一个派生作者
+## 新增派生作者
 
-1. 使用 `create_new_derived_author_persona.py` 建立骨架；
-2. 完成 lineage；
-3. 分别写 inherited、transformed、rejected、original 和 rationale；
-4. 完成 core model、genre modes 和 load map；
-5. 建立独立 memory、evals 和 comparison；
-6. 更新根 project manifest；
-7. 先通过校准和对抗评测，再开始正式生产。
+1. 调用 persona generator；
+2. 完成 lineage 与五类 derivation 文件；
+3. 完成 core、genre、boundaries、uncertainties；
+4. 保持独立 memory/indexes；
+5. 完成 calibration/adversarial evaluation 后再进入真实生产。
 
-## 新增一篇文章
+## 新增 work item
 
-1. 使用 `create_new_writing_work_item.py` 创建任务包；
-2. 完成 brief；
-3. 选择一个派生作者、模型版本、runbook 和 runtime；
-4. 建立 research pack 和 source register；
-5. 完成 plan；
-6. 创建不可覆盖的 draft 版本；
-7. 完成 factual review；
-8. 完成 style review；
-9. 等待 editor review；
-10. 获批后准备 final 和 publication metadata。
+1. 选择 persona、runbook、runtime；
+2. 调用 runbook-driven scaffolder；
+3. 完成 brief/research/source register/plan；
+4. 每次模型运行写 reproducible run manifest；
+5. 生成不可覆盖 draft；
+6. 依次通过 factual、persona/style、editor gates；
+7. approved 后才进入 publication preparation。
 
-## 发布一篇文章
+## 新增 experiment
 
-1. 检查状态为 `approved`；
-2. 检查事实与文风审核为 `passed`；
-3. 检查编辑为 `approved`；
-4. 将 final 复制到合适的 `approved-publications/` 分类；
-5. 写 publication metadata；
-6. 重建 manifest；
-7. 运行验证；
-8. 网站只读取 `published` 状态内容。
+1. 调用 experiment generator；
+2. 锁定 shared controlled inputs 与 controlled execution；
+3. 把真实 held-out pack 放到 evaluator-only storage；
+4. 按 condition × repetition 写 immutable run records；
+5. 盲评并保留失败、排除和 disagreement；
+6. 生成 aggregate analysis；
+7. 最后写 conclusion，并根据失败修改架构。
 
 ---
 
-# 二十二、sample 注释的处理
+# 二十二、最终判定
 
-当前每个文件都有：
+这套仓库已经不是只有目录的“实验室宪法”：schema、cross-reference、provenance、state、scaffolding、run reproducibility、experiment controls 与 publication transaction 已进入执行链。
+
+它仍不是一次已经完成的真实实验。当前正确状态是：
 
 ```text
-这是一个 sample，文件实质完成后删掉这行注释
+Reference architecture: complete
+Executable pre-real-run core: complete
+Real source content: not started
+Real A→B/C controlled experiment: not run
+Experimental validation: false
+Production publications: none
 ```
 
-Markdown、Python、YAML、TOML 和 Git 配置使用各自注释语法；JSON 和 JSONL 使用 `_sample_comment` 字段。
-
-这个标记表示文件目前主要承担“结构和职责示范”，不表示路径本身应删除。实际填入真实内容后，应逐个文件移除标记。只有当仓库不再要求所有文件保留 sample 标记时，才同时修改：
-
-- `validate_sample_comment_markers.py`
-- `test_sample_comment_marker_validation.py`
-- GitHub Actions 中对应步骤
-- 根 README 中的说明
-
-不能先大规模删除标记而保留必然失败的 CI。
-
----
-
-# 二十三、这套目录的最终原则
-
-这不是一个把 EPUB、prompt、脚本和文章放在一起的文件夹，而是一套有明确证据链和权限边界的作者研究与生产系统。
-
-- 源作者材料回答“真实留下了什么”；
-- 源作者研究回答“我们如何理解这些材料”；
-- 源作者模型回答“哪些研究结论可以被稳定加载”；
-- 派生作者回答“怎样建立一个受影响但独立的新作者”；
-- Harness 回答“工作按什么合同和质量门运行”；
-- Runtime 回答“在哪个环境和模型上执行”；
-- Work item 回答“一篇文章具体经历了什么”；
-- Evaluations 回答“系统是否保持人格、原创、事实和区分度”；
-- Publications 回答“什么已经获得编辑批准，可以正式存在”。
-
-任何新工作都应先判断自己属于哪一层，再写入对应目录。不能因为某个文件方便加载，就跨越层级把研究、人格、runtime、任务和出版混在一起。
+下一阶段不应继续横向扩目录，而应选择一个有限真实 corpus、一个主要 runtime 和一组固定任务，运行第一场受控实验。
