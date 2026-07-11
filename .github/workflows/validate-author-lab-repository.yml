@@ -32,9 +32,22 @@ jobs:
         run: python repository-automation-scripts/validate_machine_readable_contracts.py
       - name: Validate repository cross references
         run: python repository-automation-scripts/validate_repository_cross_references.py
+      - name: Validate canonical policy references
+        run: python repository-automation-scripts/validate_policy_rule_references.py
       - name: Validate work-item states
         run: python repository-automation-scripts/validate_writing_work_item_state.py
-      - name: Validate required sample markers
-        run: python repository-automation-scripts/validate_sample_comment_markers.py
+      - name: Validate repository placeholders
+        shell: bash
+        run: |
+          set -o pipefail
+          python repository-automation-scripts/validate_sample_comment_markers.py \
+            | tee "$RUNNER_TEMP/placeholder-validation.log"
+      - name: Upload validation diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: validation-diagnostics
+          path: ${{ runner.temp }}/placeholder-validation.log
+          if-no-files-found: ignore
       - name: Run repository validation tests
         run: pytest repository-validation-tests
