@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import argparse
-import json
 from pathlib import Path
 import re
 import shutil
@@ -249,7 +248,10 @@ def updated_component_register(
             "experimentally_validated": False,
         }
     )
-    return {**register, "components": sorted(components, key=lambda item: item["component_id"])}
+    return {
+        **register,
+        "components": sorted(components, key=lambda item: item["component_id"]),
+    }
 
 
 def create_persona(
