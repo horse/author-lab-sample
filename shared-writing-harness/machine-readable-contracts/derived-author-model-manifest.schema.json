@@ -1,0 +1,19 @@
+{
+  "_sample_comment": "这是一个 sample，文件实质完成后删掉这行注释",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Derived Author Model Manifest",
+  "type": "object",
+  "required": ["schema_version", "derived_author_model_id", "derived_author_id", "model_version", "status", "core_model_directory", "genre_modes_directory", "loading_map"],
+  "properties": {
+    "_sample_comment": {"type": "string"},
+    "schema_version": {"type": "string"},
+    "derived_author_model_id": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*-model$"},
+    "derived_author_id": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
+    "model_version": {"type": "string"},
+    "status": {"type": "string", "minLength": 1},
+    "core_model_directory": {"type": "string", "minLength": 1},
+    "genre_modes_directory": {"type": "string", "minLength": 1},
+    "loading_map": {"type": "string", "minLength": 1}
+  },
+  "additionalProperties": false
+}
