@@ -26,28 +26,32 @@
 **Files:**
 - Create: `documentation/complete-repository-file-and-directory-reference.md`
 
-- [ ] Explain the repository's own one-way data flow and authority hierarchy.
-- [ ] Explain root files and every top-level directory.
-- [ ] Enumerate every nested directory and file with its intended responsibility.
-- [ ] For each layer, state who reads it, who may write it, its upstream inputs, downstream outputs, and prohibited uses.
-- [ ] Add operational reading paths for source curators, researchers, source-model curators, derived-author designers, writers, factual reviewers, style reviewers, editors, publishers, runtime maintainers, and repository maintainers.
-- [ ] Explain how a new source author, a new derived author, a new work item, and a new publication should be added.
+- [x] Explain the repository's own one-way data flow and authority hierarchy.
+- [x] Explain root files and every top-level directory.
+- [x] Enumerate every nested directory and file with its intended responsibility.
+- [x] For each layer, state who reads it, who may write it, its upstream inputs, downstream outputs, and prohibited uses.
+- [x] Add operational reading paths for source curators, researchers, source-model curators, derived-author designers, writers, factual reviewers, style reviewers, editors, publishers, runtime maintainers, and repository maintainers.
+- [x] Explain how a new source author, a new derived author, a new work item, and a new publication should be added.
 
 ### Task 2: Update the documentation index
 
 **Files:**
 - Modify: `documentation/README.md`
 
-- [ ] Add the canonical guide as the first navigation entry.
-- [ ] Explain that the guide is the authoritative path-by-path and workflow reference.
+- [x] Add the canonical guide as the first navigation entry.
+- [x] Explain that the guide is the authoritative path-by-path and workflow reference.
 
 ### Task 3: Verify repository consistency
 
 **Files:**
 - Existing validation scripts and tests only.
 
-- [ ] Run repository structure validation.
-- [ ] Run JSON and JSONL parsing validation.
-- [ ] Run sample-marker validation.
-- [ ] Run work-item state validation.
-- [ ] Run pytest through GitHub Actions.
+- [x] Run repository structure validation.
+- [x] Run JSON and JSONL parsing validation.
+- [x] Run sample-marker validation.
+- [x] Run work-item state validation.
+- [x] Run pytest through GitHub Actions.
+
+## Verification result
+
+GitHub Actions workflow `Validate Author Lab Repository`, run 4, completed successfully with every validation and pytest step passing.
