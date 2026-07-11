@@ -9,6 +9,7 @@ REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 SCRIPT_DIRECTORY = REPOSITORY_ROOT / "repository-automation-scripts"
 PUBLISHER_PATH = SCRIPT_DIRECTORY / "publish_approved_writing_work_item.py"
 SUPPORT_PATH = SCRIPT_DIRECTORY / "publication_gate_support.py"
+SAMPLE_MARKER = "这是一个 sample，文件实质完成后删掉这行注释"
 
 
 def load_module(name: str, path: Path):
@@ -41,6 +42,7 @@ def prepare_repository(root: Path) -> Path:
         {
             "derived_author_id": "derived-b",
             "author_model_directory": "derived-author-model",
+            "work_items_directory": "derived-author-writing-work-items",
             "publications_directory": "derived-author-publications",
         },
     )
@@ -83,7 +85,6 @@ def prepare_repository(root: Path) -> Path:
 
 def test_empty_publication_manifest_serializes_as_empty_jsonl():
     support = load_module("publication_support_empty", SUPPORT_PATH)
-
     assert support.serialize_publication_manifest([]) == ""
 
 
@@ -136,3 +137,30 @@ def test_interrupted_transaction_journal_is_recovered_before_new_publish(tmp_pat
 
     assert not journal.exists()
     assert (work_root / "work-item-state.json").is_file()
+
+
+def test_active_publication_transaction_emits_no_sample_markers_or_sentinels(tmp_path):
+    publisher = load_module("publication_active_mode", PUBLISHER_PATH)
+    prepare_repository(tmp_path)
+
+    publication_root = publisher.publish_approved_work_item(
+        repository_root=tmp_path,
+        work_item_id="2026-001-test",
+        publication_id="publication-2026-001-test",
+        title="Test",
+        publication_category="researched-essays",
+        publication_status="published",
+        published_at="2026-07-11T12:00:00+09:00",
+    )
+
+    checked_paths = [
+        publication_root / "publication-metadata.json",
+        tmp_path / "approved-publications/approved-publication-manifest.jsonl",
+        tmp_path / "derived-author-personas/derived-b/derived-author-writing-work-items/derived-author-work-item-index.jsonl",
+        tmp_path / "derived-author-personas/derived-b/derived-author-publications/derived-author-publication-index.jsonl",
+    ]
+    for path in checked_paths:
+        text = path.read_text(encoding="utf-8")
+        assert SAMPLE_MARKER not in text
+        assert "SAMPLE-NOT-PUBLISHED" not in text
+        assert "generated-empty" not in text
