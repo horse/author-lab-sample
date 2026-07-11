@@ -7,6 +7,6 @@
   "languages": ["zh-Hans"],
   "corpus_manifest": "source-corpus/source-corpus-manifest.jsonl",
   "rights_register": "source-rights-register.jsonl",
-  "research_directory": "../../../source-author-research/source-author-sample-research",
-  "compiled_model_directory": "../../../source-author-models/source-author-sample-model"
+  "research_directory": "../../source-author-research/source-author-sample-research",
+  "compiled_model_directory": "../../source-author-models/source-author-sample-model"
 }
