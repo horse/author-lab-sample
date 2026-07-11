@@ -13,8 +13,18 @@ ALLOWED_LIFECYCLE_STATUSES = (
     "under-review",
     "approved",
     "published",
+    "rejected",
+    "cancelled",
+    "abandoned",
+    "superseded",
     "archived",
 )
+PUBLICATION_FIELDS = {
+    "publication_id",
+    "publication_status",
+    "canonical_file",
+    "published_at",
+}
 
 
 def validate_state_document(document: dict) -> list[str]:
@@ -31,25 +41,65 @@ def validate_state_document(document: dict) -> list[str]:
     style_gate = quality_gates.get("persona_and_style")
     editorial_gate = quality_gates.get("editorial_approval")
 
-    if factual_gate == "passed" and stage_executions.get("factual-review", {}).get("status") != "completed":
-        errors.append("factual_accuracy=passed requires factual-review stage status=completed.")
-    if style_gate == "passed" and stage_executions.get("style-review", {}).get("status") != "completed":
-        errors.append("persona_and_style=passed requires style-review stage status=completed.")
+    if (
+        factual_gate == "passed"
+        and stage_executions.get("factual-review", {}).get("status") != "completed"
+    ):
+        errors.append(
+            "factual_accuracy=passed requires factual-review stage status=completed."
+        )
+    if (
+        style_gate == "passed"
+        and stage_executions.get("style-review", {}).get("status") != "completed"
+    ):
+        errors.append(
+            "persona_and_style=passed requires style-review stage status=completed."
+        )
+    if (
+        editorial_gate == "approved"
+        and stage_executions.get("editor-review", {}).get("status") != "completed"
+    ):
+        errors.append(
+            "editorial_approval=approved requires editor-review stage status=completed."
+        )
 
-    if lifecycle_status in {"under-review", "approved", "published", "archived"}:
+    if lifecycle_status in {"approved", "published"}:
         if factual_gate != "passed":
             errors.append(f"{lifecycle_status} requires factual_accuracy=passed.")
         if style_gate != "passed":
             errors.append(f"{lifecycle_status} requires persona_and_style=passed.")
+        if editorial_gate != "approved":
+            errors.append(f"{lifecycle_status} requires editorial_approval=approved.")
 
-    if lifecycle_status in {"approved", "published", "archived"} and editorial_gate != "approved":
-        errors.append(f"{lifecycle_status} requires editorial_approval=approved.")
+    publication = document.get("publication")
+    if publication is not None:
+        if not isinstance(publication, dict):
+            errors.append("publication metadata must be an object or null.")
+        else:
+            missing = sorted(PUBLICATION_FIELDS - set(publication))
+            if missing:
+                errors.append(
+                    f"publication metadata is missing required fields: {missing}."
+                )
+            if (
+                publication.get("publication_status") == "published"
+                and not publication.get("published_at")
+            ):
+                errors.append("published publication metadata requires published_at.")
 
-    if lifecycle_status == "published" and not document.get("publication"):
-        errors.append("published lifecycle_status requires publication metadata.")
+    if lifecycle_status == "published":
+        if not isinstance(publication, dict):
+            errors.append("published lifecycle_status requires publication metadata.")
+        elif publication.get("publication_status") != "published":
+            errors.append(
+                "published lifecycle_status requires publication_status=published."
+            )
 
-    if editorial_gate == "approved" and stage_executions.get("editor-review", {}).get("status") != "completed":
-        errors.append("editorial_approval=approved requires editor-review stage status=completed.")
+    archive_reason = document.get("archive_reason")
+    if lifecycle_status == "archived" and not (
+        isinstance(archive_reason, str) and archive_reason.strip()
+    ):
+        errors.append("archived lifecycle_status requires a non-empty archive_reason.")
 
     return errors
 
@@ -60,19 +110,25 @@ def main(argv: list[str] | None = None) -> int:
         state_paths = [Path(value) for value in arguments]
     else:
         repository_root = Path(__file__).resolve().parents[1]
-        state_paths = list(repository_root.glob("writing-work-items/**/work-item-state.json"))
+        state_paths = list(
+            repository_root.glob("writing-work-items/**/work-item-state.json")
+        )
 
     errors: list[str] = []
     for path in state_paths:
         with path.open("r", encoding="utf-8") as handle:
             document = json.load(handle)
-        errors.extend(f"{path}: {error}" for error in validate_state_document(document))
+        errors.extend(
+            f"{path}: {error}" for error in validate_state_document(document)
+        )
 
     if errors:
         print("Work-item state validation failed:")
         print("\n".join(errors))
         return 1
-    print(f"Work-item state validation passed: {len(state_paths)} state files checked.")
+    print(
+        f"Work-item state validation passed: {len(state_paths)} state files checked."
+    )
     return 0
 
 

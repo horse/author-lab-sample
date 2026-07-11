@@ -36,14 +36,34 @@ SOURCE-ID.edition-01.segmentation-01.segment-00042-<hash-prefix>
 - edition 改变意味着来源版本改变；
 - segmentation version 改变意味着分段规则或顺序改变；
 - content hash 相同只能证明文本内容相同，不能证明 segment ID 应保持不变；
-- 重新分段后，旧研究 claim 继续指向旧 segmentation namespace，直到经过显式迁移和复核。
+- 重新分段后，旧 research claim 继续指向旧 segmentation namespace，直到显式迁移和复核。
 
 不能把按当前顺序生成的数字称为跨编辑稳定 ID。
 
-## 三、Research claim
+## 三、Author-scoped research namespace
+
+每个 research directory 只属于一个 `source_author_id`。Validator 分别建立：
+
+```text
+source_author_id
+  → owned segment IDs
+  → owned research claim IDs
+  → owned source-model rules
+```
+
+以下行为无效：
+
+- Author A 的 claim 引用 Author B 的 segment；
+- Author A 的 model rule 引用 Author B 的 claim；
+- provenance record 声明的 source author/model 与其目录或 manifest 不一致。
+
+全仓库 ID 存在并不足以通过验证；ownership 必须匹配。
+
+## 四、Research claim
 
 关于 concerns、worldview、knowledge、reasoning、emotion 与 style 的每条实质结论都应进入 `research-claim-evidence-register.jsonl`，至少包含：
 
+- `source_author_id`；
 - `research_claim_id`；
 - claim；
 - confidence；
@@ -51,9 +71,15 @@ SOURCE-ID.edition-01.segmentation-01.segment-00042-<hash-prefix>
 - supporting segment IDs；
 - counterexample segment IDs。
 
-研究文件可以长篇讨论，但能够进入 source-author model 的规则必须能回到已接受 research claim。
+Status：
 
-## 四、证据等级
+```text
+proposed | accepted | rejected | superseded | sample-unreviewed
+```
+
+研究文件可以长篇讨论，但能够进入 source-author model 的规则必须回到同一 source author 的 accepted research claim。
+
+## 五、证据等级
 
 研究员应区分：
 
@@ -66,7 +92,7 @@ SOURCE-ID.edition-01.segmentation-01.segment-00042-<hash-prefix>
 
 二手解释不能冒充源作者原话；高频出现也不能自动证明稳定人格特征，因为 corpus 可能受到文类、时期和保存偏差影响。
 
-## 五、时期、文类与反例
+## 六、时期、文类与反例
 
 研究不得把所有材料平均成一个声音。
 
@@ -86,7 +112,7 @@ SOURCE-ID.edition-01.segmentation-01.segment-00042-<hash-prefix>
 - 编辑或翻译痕迹；
 - 材料缺失造成的替代解释。
 
-## 六、置信度与模型准入
+## 七、置信度与模型准入
 
 建议使用：
 
@@ -95,15 +121,28 @@ SOURCE-ID.edition-01.segmentation-01.segment-00042-<hash-prefix>
 - provisional：材料有限，暂时作为研究假设；
 - open：存在多个合理解释，不进入模型规则。
 
-只有达到项目规定门槛并处于 accepted 状态的 claim 才能编译进 source-author model。模型 provenance register 必须记录：
+只有达到项目门槛并处于 `accepted` 状态的 claim 才能支持 approved source-model rule。
+
+Model provenance record 必须包含：
 
 ```text
+source_author_id
+source_author_model_id
 model_rule_id
-→ research_claim_ids
-→ model_file
+research_claim_ids
+model_file
+status
 ```
 
-## 七、禁止的证据回流
+Rule status：
+
+```text
+proposed | approved | rejected | superseded | sample-unreviewed
+```
+
+`approved` rule 引用任何非 accepted claim 都会失败。
+
+## 八、禁止的证据回流
 
 以下内容不能成为关于源作者的研究证据：
 
@@ -114,15 +153,16 @@ model_rule_id
 - evaluator 对“像不像”的主观印象；
 - 另一个派生作者的 memory。
 
-这由 `POLICY-PROVENANCE-001` 强制执行。
+这由 `POLICY-PROVENANCE-001` 与 author-scoped provenance validator 强制执行。
 
-## 八、研究完成的含义
+## 九、研究完成的含义
 
 完成某个研究文件不表示“作者已经被解释完”。完成意味着：
 
 - 资料与 rights 可追溯；
-- claim 可定位到版本化 segment；
+- claim 可定位到同一作者的版本化 segment；
 - 反例和限制被记录；
 - confidence 与 status 明确；
-- source model 只接受经过门槛的内容；
+- source model 只接受同一作者的 accepted claims；
+- provenance 声明正确的 author/model ownership；
 - 未解决问题继续保留在 limitations 和 open questions 中。

@@ -46,13 +46,15 @@ def prepare_repository(root: Path, segment_id: str, claim_segment_id: str, prove
     )
     write_jsonl(
         root / "source-authors/source-a/source-corpus/normalized-source-materials/structured-metadata/SOURCE-A-segment-location-map.jsonl",
-        [{"segment_id": segment_id}],
+        [{"source_author_id": "source-a", "segment_id": segment_id}],
     )
     write_jsonl(
         root / "source-author-research/source-a-research/evidence-and-confidence/research-claim-evidence-register.jsonl",
         [
             {
+                "source_author_id": "source-a",
                 "research_claim_id": "RESEARCH-CLAIM-0001",
+                "status": "accepted",
                 "supporting_segments": [claim_segment_id],
                 "counterexample_segments": [],
             }
@@ -74,10 +76,12 @@ def prepare_repository(root: Path, segment_id: str, claim_segment_id: str, prove
         root / "source-author-models/source-a-model/source-author-model-provenance-register.jsonl",
         [
             {
+                "source_author_id": "source-a",
+                "source_author_model_id": "source-a-model",
                 "model_rule_id": "SOURCE-MODEL-RULE-0001",
                 "research_claim_ids": [provenance_claim_id],
                 "model_file": "core-author-model/reasoning-patterns.md",
-                "status": "accepted",
+                "status": "approved",
             }
         ],
     )

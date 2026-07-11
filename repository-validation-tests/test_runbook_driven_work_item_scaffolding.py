@@ -25,7 +25,11 @@ def write_json(path: Path, document: dict) -> None:
 def prepare_repository(root: Path) -> None:
     write_json(
         root / "author-lab-project-manifest.json",
-        {"writing_work_items_directory": "writing-work-items"},
+        {
+            "repository_mode": "reference-sample",
+            "writing_work_items_directory": "writing-work-items",
+            "derived_author_persona_directories": ["derived-author-personas/derived-b"],
+        },
     )
     write_json(
         root / "derived-author-personas/derived-b/derived-author-persona-manifest.json",
@@ -87,11 +91,14 @@ def test_scaffolder_reads_artifacts_stages_and_versions_from_selected_contracts(
         "2026-001-custom-article / derived-b\n"
     )
     assert not (work_root / "writing-brief.md").exists()
+    assert (work_root / "writing-runs/README.md").is_file()
+    assert (work_root / "writing-runs/run-sample-not-run.json").is_file()
     state = json.loads((work_root / "work-item-state.json").read_text(encoding="utf-8"))
     assert state["derived_author_model_id"] == "derived-b-model"
     assert state["derived_author_model_version"] == "1.2.3"
     assert state["runbook_version"] == "3.0.0"
     assert state["runtime_adapter_version"] == "2.0.0"
+    assert state["archive_reason"] is None
     assert state["stage_executions"] == {
         "intake": {"status": "in-progress"},
         "custom-stage": {"status": "not-started"},
@@ -99,7 +106,7 @@ def test_scaffolder_reads_artifacts_stages_and_versions_from_selected_contracts(
     }
 
 
-def test_scaffolder_rejects_required_artifact_without_template(tmp_path):
+def test_scaffolder_rejects_required_artifact_without_template_and_leaves_no_partial_directory(tmp_path):
     module = load_script_module()
     prepare_repository(tmp_path)
     runbook_path = tmp_path / "shared-writing-harness/writing-runbooks/custom-runbook/writing-runbook-manifest.json"
@@ -115,7 +122,8 @@ def test_scaffolder_rejects_required_artifact_without_template(tmp_path):
             runbook_id="custom-runbook",
             runtime_adapter_id="test-runtime",
         )
-    except SystemExit as exc:
+    except ValueError as exc:
         assert "missing-template.md" in str(exc)
     else:
         raise AssertionError("Expected missing artifact template to reject scaffolding")
+    assert not (tmp_path / "writing-work-items/2026-writing-work-items/2026-002-invalid-runbook").exists()

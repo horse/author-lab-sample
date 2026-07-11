@@ -19,22 +19,38 @@
     {
       "condition_id": "condition-generic-runtime-baseline",
       "condition_role": "generic-runtime-baseline",
-      "author_condition": null
+      "persona_id": null,
+      "author_model_id": null,
+      "author_model_version": null,
+      "source_author_model_id": null,
+      "source_author_model_version": null
     },
     {
       "condition_id": "condition-source-model-direct-baseline",
       "condition_role": "source-model-direct-baseline",
-      "author_condition": "source-author-sample-model"
+      "persona_id": null,
+      "author_model_id": "source-author-sample-model",
+      "author_model_version": "0.1.0",
+      "source_author_model_id": "source-author-sample-model",
+      "source_author_model_version": "0.1.0"
     },
     {
       "condition_id": "condition-derived-author-b",
       "condition_role": "derived-author-b",
-      "author_condition": "derived-author-sample-b"
+      "persona_id": "derived-author-sample-b",
+      "author_model_id": "derived-author-sample-b-model",
+      "author_model_version": "0.1.0",
+      "source_author_model_id": "source-author-sample-model",
+      "source_author_model_version": "0.1.0"
     },
     {
       "condition_id": "condition-derived-author-c",
       "condition_role": "derived-author-c",
-      "author_condition": "derived-author-sample-c"
+      "persona_id": "derived-author-sample-c",
+      "author_model_id": "derived-author-sample-c-model",
+      "author_model_version": "0.1.0",
+      "source_author_model_id": "source-author-sample-model",
+      "source_author_model_version": "0.1.0"
     }
   ],
   "held_out_evaluation_pack_uri": "evaluator-storage://author-lab-sample/experiment-2026-001/held-out-pack",

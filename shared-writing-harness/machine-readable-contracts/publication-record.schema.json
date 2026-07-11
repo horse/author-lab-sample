@@ -18,9 +18,9 @@
     "_sample_comment": {"type": "string"},
     "publication_id": {
       "type": "string",
-      "pattern": "^(publication-[0-9]{4}-[0-9]{3}-[a-z0-9]+(?:-[a-z0-9]+)*|SAMPLE-NOT-PUBLISHED)$"
+      "pattern": "^publication-[0-9]{4}-[0-9]{3}-[a-z0-9]+(?:-[a-z0-9]+)*$"
     },
-    "work_item_id": {"type": "string"},
+    "work_item_id": {"type": "string", "pattern": "^[0-9]{4}-[0-9]{3}-[a-z0-9]+(?:-[a-z0-9]+)*$"},
     "derived_author_id": {"type": "string"},
     "derived_author_model_id": {"type": "string"},
     "derived_author_model_version": {"type": "string"},
@@ -36,7 +36,19 @@
         "required": ["publication_status"]
       },
       "then": {
-        "properties": {"published_at": {"type": "string", "format": "date-time"}}
+        "properties": {
+          "published_at": {"type": "string", "format": "date-time"},
+          "canonical_file": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {"publication_status": {"const": "approved"}},
+        "required": ["publication_status"]
+      },
+      "then": {
+        "properties": {"canonical_file": {"type": "string", "minLength": 1}}
       }
     }
   ],

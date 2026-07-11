@@ -7,30 +7,37 @@ import argparse
 import json
 from pathlib import Path
 import re
+import sys
 from typing import Any
 
-SAMPLE_MARKER = "这是一个 sample，文件实质完成后删掉这行注释"
+SCRIPT_DIRECTORY = Path(__file__).resolve().parent
+if str(SCRIPT_DIRECTORY) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIRECTORY))
+
+from atomic_repository_update import (  # noqa: E402
+    promote_staged_directory,
+    staged_sibling_directory,
+)
+from repository_mode_support import (  # noqa: E402
+    RepositoryModeContext,
+    dump_json,
+    load_json,
+)
 
 
 def validate_identifier(value: str) -> str:
-    if not re.fullmatch(r"experiment-\d{4}-\d{3}-[a-z0-9]+(?:-[a-z0-9]+)*", value):
+    if not re.fullmatch(
+        r"experiment-\d{4}-\d{3}-[a-z0-9]+(?:-[a-z0-9]+)*", value
+    ):
         raise argparse.ArgumentTypeError(
             "Experiment ID must use experiment-YYYY-NNN-descriptive-slug."
         )
     return value
 
 
-def load_json(path: Path) -> dict[str, Any]:
-    with path.open("r", encoding="utf-8") as handle:
-        return json.load(handle)
-
-
 def write_json(path: Path, document: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(
-        json.dumps(document, ensure_ascii=False, indent=2) + "\n",
-        encoding="utf-8",
-    )
+    path.write_text(dump_json(document), encoding="utf-8")
 
 
 def find_manifest_by_id(
@@ -39,17 +46,151 @@ def find_manifest_by_id(
     id_field: str,
     target_id: str,
 ) -> tuple[Path, dict[str, Any]]:
+    matches: list[tuple[Path, dict[str, Any]]] = []
     for path in repository_root.glob(pattern):
         document = load_json(path)
         if document.get(id_field) == target_id:
-            return path, document
-    raise ValueError(f"Could not resolve {id_field}={target_id!r}")
+            matches.append((path, document))
+    if len(matches) != 1:
+        raise ValueError(
+            f"Expected exactly one {id_field}={target_id!r}; found {len(matches)}"
+        )
+    return matches[0]
 
 
 def validate_held_out_uri(value: str) -> str:
     if not value.startswith("evaluator-storage://"):
         raise ValueError("held_out_evaluation_pack_uri must use evaluator-storage://")
     return value
+
+
+def resolve_persona_condition(
+    repository_root: Path,
+    role: str,
+    persona_id: str,
+    source_model: dict[str, Any],
+) -> dict[str, Any]:
+    persona_path, persona = find_manifest_by_id(
+        repository_root,
+        "derived-author-personas/*/derived-author-persona-manifest.json",
+        "derived_author_id",
+        persona_id,
+    )
+    persona_root = persona_path.parent
+    model = load_json(
+        persona_root
+        / persona["author_model_directory"]
+        / "derived-author-model-manifest.json"
+    )
+    if model.get("derived_author_id") != persona_id:
+        raise ValueError(f"Persona {persona_id} model belongs to another persona")
+
+    lineage_path = persona_root / persona.get("lineage_file", "derived-author-lineage.json")
+    if lineage_path.is_file():
+        lineage = load_json(lineage_path)
+        matching_lineage = [
+            item
+            for item in lineage.get("source_models", [])
+            if item.get("source_author_model_id")
+            == source_model["source_author_model_id"]
+            and item.get("source_author_model_version")
+            == source_model["model_version"]
+        ]
+        if not matching_lineage:
+            raise ValueError(
+                f"Persona {persona_id} lineage does not pin source model "
+                f"{source_model['source_author_model_id']}@{source_model['model_version']}"
+            )
+
+    return {
+        "condition_id": f"condition-{role}",
+        "condition_role": role,
+        "persona_id": persona_id,
+        "author_model_id": model["derived_author_model_id"],
+        "author_model_version": model["model_version"],
+        "source_author_model_id": source_model["source_author_model_id"],
+        "source_author_model_version": source_model["model_version"],
+    }
+
+
+def render_experiment_tree(
+    root: Path,
+    context: RepositoryModeContext,
+    manifest: dict[str, Any],
+) -> None:
+    (root / "controlled-inputs").mkdir(parents=True)
+    (root / "runtime-run-records").mkdir(parents=True)
+    (root / "failure-cases").mkdir(parents=True)
+    write_json(root / "experiment-manifest.json", manifest)
+
+    marker = context.markdown_marker()
+    (root / "hypothesis.md").write_text(
+        "# Experiment Hypothesis\n\n"
+        f"{marker}"
+        "When the brief, research pack, runbook, runtime, model parameters, "
+        "context budget, tool permissions, and repetition policy are held constant, "
+        "the two derived-author conditions should remain distinguishable in blinded "
+        "evaluation while avoiding source-author identity, experience, authority, "
+        "and distinctive-language leakage.\n",
+        encoding="utf-8",
+    )
+    (root / "controlled-inputs/README.md").write_text(
+        "# Controlled Inputs\n\n"
+        f"{marker}"
+        "Store the common brief, research pack, and task set. Execution controls "
+        "are canonical in `experiment-manifest.json`. Do not place held-out "
+        "evaluator content here.\n",
+        encoding="utf-8",
+    )
+    (root / "runtime-run-records/README.md").write_text(
+        "# Runtime Run Records\n\n"
+        f"{marker}"
+        "Create one immutable run record per condition and repetition, including "
+        "commit SHA, condition ID, runtime and runbook versions, model identifier "
+        "and parameters, loaded file hashes, timestamps, exit status, and output paths.\n",
+        encoding="utf-8",
+    )
+    (root / "failure-cases/README.md").write_text(
+        "# Failure Cases\n\n"
+        f"{marker}"
+        "Preserve leakage, fabrication, persona collapse, evaluator disagreement, "
+        "excluded runs, and infrastructure failures with reasons.\n",
+        encoding="utf-8",
+    )
+
+    raw_result = {
+        "evaluation_result_id": "SAMPLE-NOT-RUN",
+        "experiment_id": manifest["experiment_id"],
+        "condition_blind_code": "UNASSIGNED",
+        "evaluator_id": "UNASSIGNED",
+        "status": "not-run",
+        "scores": {},
+        "notes": [],
+    }
+    (root / "raw-evaluation-results.jsonl").write_text(
+        context.empty_jsonl(raw_result), encoding="utf-8"
+    )
+    write_json(
+        root / "aggregate-analysis.json",
+        context.with_json_marker(
+            {
+                "experiment_id": manifest["experiment_id"],
+                "analysis_status": "not-run",
+                "condition_summary": {},
+                "evaluator_agreement": None,
+                "excluded_run_count": 0,
+                "failure_case_count": 0,
+                "conclusion_supported": None,
+            }
+        ),
+    )
+    (root / "experiment-conclusion.md").write_text(
+        "# Experiment Conclusion\n\n"
+        f"{marker}"
+        "Status: not run. Do not write a conclusion before raw evaluation results "
+        "and aggregate analysis exist.\n",
+        encoding="utf-8",
+    )
 
 
 def create_experiment(
@@ -69,8 +210,11 @@ def create_experiment(
 ) -> Path:
     if repetition_count < 1:
         raise ValueError("repetition_count must be at least 1")
+    if derived_author_b_id == derived_author_c_id:
+        raise ValueError("Derived Author B and C must be distinct personas")
 
-    project = load_json(repository_root / "author-lab-project-manifest.json")
+    context = RepositoryModeContext.from_project(repository_root)
+    project = context.project
     experiment_directory = project["author_model_experiments_directory"]
 
     _, runtime = find_manifest_by_id(
@@ -92,18 +236,32 @@ def create_experiment(
         source_model_id,
     )
 
-    persona_conditions: list[tuple[str, dict[str, Any]]] = []
-    for role, persona_id in (
-        ("derived-author-b", derived_author_b_id),
-        ("derived-author-c", derived_author_c_id),
-    ):
-        _, persona = find_manifest_by_id(
-            repository_root,
-            "derived-author-personas/*/derived-author-persona-manifest.json",
-            "derived_author_id",
-            persona_id,
-        )
-        persona_conditions.append((role, persona))
+    conditions: list[dict[str, Any]] = [
+        {
+            "condition_id": "condition-generic-runtime-baseline",
+            "condition_role": "generic-runtime-baseline",
+            "persona_id": None,
+            "author_model_id": None,
+            "author_model_version": None,
+            "source_author_model_id": None,
+            "source_author_model_version": None,
+        },
+        {
+            "condition_id": "condition-source-model-direct-baseline",
+            "condition_role": "source-model-direct-baseline",
+            "persona_id": None,
+            "author_model_id": source_model["source_author_model_id"],
+            "author_model_version": source_model["model_version"],
+            "source_author_model_id": source_model["source_author_model_id"],
+            "source_author_model_version": source_model["model_version"],
+        },
+        resolve_persona_condition(
+            repository_root, "derived-author-b", derived_author_b_id, source_model
+        ),
+        resolve_persona_condition(
+            repository_root, "derived-author-c", derived_author_c_id, source_model
+        ),
+    ]
 
     held_out_uri = validate_held_out_uri(
         held_out_evaluation_pack_uri
@@ -112,36 +270,6 @@ def create_experiment(
             f"{experiment_id}/held-out-pack"
         )
     )
-
-    experiment_root = repository_root / experiment_directory / experiment_id
-    if experiment_root.exists():
-        raise ValueError(f"Experiment already exists: {experiment_root}")
-
-    (experiment_root / "controlled-inputs").mkdir(parents=True)
-    (experiment_root / "runtime-run-records").mkdir(parents=True)
-    (experiment_root / "failure-cases").mkdir(parents=True)
-
-    conditions: list[dict[str, Any]] = [
-        {
-            "condition_id": "condition-generic-runtime-baseline",
-            "condition_role": "generic-runtime-baseline",
-            "author_condition": None,
-        },
-        {
-            "condition_id": "condition-source-model-direct-baseline",
-            "condition_role": "source-model-direct-baseline",
-            "author_condition": source_model["source_author_model_id"],
-        },
-    ]
-    for role, persona in persona_conditions:
-        conditions.append(
-            {
-                "condition_id": f"condition-{role}",
-                "condition_role": role,
-                "author_condition": persona["derived_author_id"],
-            }
-        )
-
     controlled_execution = {
         "runtime_adapter_id": runtime["runtime_adapter_id"],
         "runtime_adapter_version": runtime["configuration_version"],
@@ -161,94 +289,29 @@ def create_experiment(
         "repetition_count": repetition_count,
         "randomness_control": randomness_control,
     }
-
-    manifest = {
-        "_sample_comment": SAMPLE_MARKER,
-        "experiment_id": experiment_id,
-        "experiment_status": "designed",
-        "hypothesis_file": "hypothesis.md",
-        "controlled_input_directory": "controlled-inputs",
-        "controlled_execution": controlled_execution,
-        "conditions": conditions,
-        "held_out_evaluation_pack_uri": held_out_uri,
-        "runtime_run_records_directory": "runtime-run-records",
-        "raw_evaluation_results_file": "raw-evaluation-results.jsonl",
-        "aggregate_analysis_file": "aggregate-analysis.json",
-        "failure_cases_directory": "failure-cases",
-        "conclusion_file": "experiment-conclusion.md",
-    }
-    write_json(experiment_root / "experiment-manifest.json", manifest)
-
-    (experiment_root / "hypothesis.md").write_text(
-        "# Experiment Hypothesis\n\n"
-        f"<!-- {SAMPLE_MARKER} -->\n\n"
-        "When the brief, research pack, runbook, runtime, model parameters, "
-        "context budget, tool permissions, and repetition policy are held constant, "
-        "the two derived-author conditions should remain distinguishable in blinded "
-        "evaluation while avoiding source-author identity, experience, authority, "
-        "and distinctive-language leakage.\n",
-        encoding="utf-8",
-    )
-    (experiment_root / "controlled-inputs/README.md").write_text(
-        "# Controlled Inputs\n\n"
-        f"<!-- {SAMPLE_MARKER} -->\n\n"
-        "Store the common brief, research pack, and task set. Execution controls "
-        "are canonical in `experiment-manifest.json`. Do not place held-out "
-        "evaluator content here.\n",
-        encoding="utf-8",
-    )
-    (experiment_root / "runtime-run-records/README.md").write_text(
-        "# Runtime Run Records\n\n"
-        f"<!-- {SAMPLE_MARKER} -->\n\n"
-        "Create one immutable run record per condition and repetition, including "
-        "commit SHA, condition ID, runtime and runbook versions, model identifier "
-        "and parameters, loaded file hashes, timestamps, exit status, and output paths.\n",
-        encoding="utf-8",
-    )
-    (experiment_root / "failure-cases/README.md").write_text(
-        "# Failure Cases\n\n"
-        f"<!-- {SAMPLE_MARKER} -->\n\n"
-        "Preserve leakage, fabrication, persona collapse, evaluator disagreement, "
-        "excluded runs, and infrastructure failures with reasons.\n",
-        encoding="utf-8",
-    )
-    (experiment_root / "raw-evaluation-results.jsonl").write_text(
-        json.dumps(
-            {
-                "_sample_comment": SAMPLE_MARKER,
-                "evaluation_result_id": "SAMPLE-NOT-RUN",
-                "experiment_id": experiment_id,
-                "condition_blind_code": "UNASSIGNED",
-                "evaluator_id": "UNASSIGNED",
-                "status": "not-run",
-                "scores": {},
-                "notes": [],
-            },
-            ensure_ascii=False,
-        )
-        + "\n",
-        encoding="utf-8",
-    )
-    write_json(
-        experiment_root / "aggregate-analysis.json",
+    manifest = context.with_json_marker(
         {
-            "_sample_comment": SAMPLE_MARKER,
             "experiment_id": experiment_id,
-            "analysis_status": "not-run",
-            "condition_summary": {},
-            "evaluator_agreement": None,
-            "excluded_run_count": 0,
-            "failure_case_count": 0,
-            "conclusion_supported": None,
-        },
+            "experiment_status": "designed",
+            "hypothesis_file": "hypothesis.md",
+            "controlled_input_directory": "controlled-inputs",
+            "controlled_execution": controlled_execution,
+            "conditions": conditions,
+            "held_out_evaluation_pack_uri": held_out_uri,
+            "runtime_run_records_directory": "runtime-run-records",
+            "raw_evaluation_results_file": "raw-evaluation-results.jsonl",
+            "aggregate_analysis_file": "aggregate-analysis.json",
+            "failure_cases_directory": "failure-cases",
+            "conclusion_file": "experiment-conclusion.md",
+        }
     )
-    (experiment_root / "experiment-conclusion.md").write_text(
-        "# Experiment Conclusion\n\n"
-        f"<!-- {SAMPLE_MARKER} -->\n\n"
-        "Status: not run. Do not write a conclusion before raw evaluation results "
-        "and aggregate analysis exist.\n",
-        encoding="utf-8",
-    )
+
+    experiment_root = repository_root / experiment_directory / experiment_id
+    if experiment_root.exists():
+        raise ValueError(f"Experiment already exists: {experiment_root}")
+    with staged_sibling_directory(experiment_root) as staging_root:
+        render_experiment_tree(staging_root, context, manifest)
+        promote_staged_directory(staging_root, experiment_root)
     return experiment_root
 
 

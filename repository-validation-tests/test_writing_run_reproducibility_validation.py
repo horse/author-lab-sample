@@ -4,6 +4,7 @@ from importlib.util import module_from_spec, spec_from_file_location
 import hashlib
 import json
 from pathlib import Path
+import subprocess
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 SCRIPT_PATH = REPOSITORY_ROOT / "repository-automation-scripts" / "validate_writing_run_reproducibility.py"
@@ -22,15 +23,26 @@ def write_json(path: Path, document: dict) -> None:
     path.write_text(json.dumps(document, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
+def initialize_git(root: Path) -> str:
+    subprocess.run(["git", "init", "-b", "main"], cwd=root, check=True, capture_output=True)
+    subprocess.run(["git", "config", "user.email", "test@example.com"], cwd=root, check=True)
+    subprocess.run(["git", "config", "user.name", "Test"], cwd=root, check=True)
+    subprocess.run(["git", "add", "."], cwd=root, check=True)
+    subprocess.run(["git", "commit", "-m", "baseline"], cwd=root, check=True, capture_output=True)
+    return subprocess.run(["git", "rev-parse", "HEAD"], cwd=root, check=True, capture_output=True, text=True).stdout.strip()
+
+
 def prepare_run(root: Path, *, recorded_hash: str, model_version: str = "1.0.0") -> None:
+    write_json(root / "author-lab-project-manifest.json", {"repository_mode": "active-author-lab"})
     loaded_file = root / "derived-author-personas/derived-b/model.md"
     loaded_file.parent.mkdir(parents=True, exist_ok=True)
     loaded_file.write_text("# Loaded model\n", encoding="utf-8")
-    output_file = root / "writing-work-items/2026/2026-001-test/draft-01.md"
+    work_root = root / "writing-work-items/2026/2026-001-test"
+    output_file = work_root / "writing-runs/run-001/draft.md"
     output_file.parent.mkdir(parents=True, exist_ok=True)
     output_file.write_text("# Draft\n", encoding="utf-8")
     write_json(
-        output_file.parent / "work-item-state.json",
+        work_root / "work-item-state.json",
         {
             "work_item_id": "2026-001-test",
             "derived_author_model_id": "derived-b-model",
@@ -41,13 +53,14 @@ def prepare_run(root: Path, *, recorded_hash: str, model_version: str = "1.0.0")
             "runtime_adapter_version": "1.0.0",
         },
     )
+    commit_sha = initialize_git(root)
     write_json(
-        output_file.parent / "writing-run-manifest.json",
+        work_root / "writing-runs/run-001.json",
         {
-            "run_id": "RUN-001",
+            "run_id": "run-001",
             "run_status": "completed",
             "work_item_id": "2026-001-test",
-            "repository_commit_sha": "a" * 40,
+            "repository_commit_sha": commit_sha,
             "derived_author_model_id": "derived-b-model",
             "derived_author_model_version": model_version,
             "runbook_id": "test-runbook",
@@ -66,7 +79,7 @@ def prepare_run(root: Path, *, recorded_hash: str, model_version: str = "1.0.0")
                     "sha256": recorded_hash,
                 }
             ],
-            "output_artifacts": ["draft-01.md"],
+            "output_artifacts": ["writing-runs/run-001/draft.md"],
             "exit_status": 0,
         },
     )

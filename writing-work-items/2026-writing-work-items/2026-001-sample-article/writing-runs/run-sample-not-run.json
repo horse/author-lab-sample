@@ -1,6 +1,6 @@
 {
   "_sample_comment": "这是一个 sample，文件实质完成后删掉这行注释",
-  "run_id": "RUN-2026-001-001",
+  "run_id": "run-sample-not-run",
   "run_status": "not-run",
   "work_item_id": "2026-001-sample-article",
   "repository_commit_sha": null,
@@ -16,16 +16,7 @@
   "tool_permissions": [],
   "started_at": null,
   "completed_at": null,
-  "loaded_file_records": [
-    {
-      "path": "derived-author-personas/derived-author-sample-b/derived-author-model/derived-author-model-loading-map.json",
-      "sha256": null
-    },
-    {
-      "path": "shared-writing-harness/writing-runbooks/standard-researched-essay/writing-runbook-manifest.json",
-      "sha256": null
-    }
-  ],
+  "loaded_file_records": [],
   "output_artifacts": [],
   "exit_status": null
 }

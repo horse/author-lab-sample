@@ -5,14 +5,18 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+import sys
 from typing import Any
 
-SAMPLE_MARKER = "这是一个 sample，文件实质完成后删掉这行注释"
+SCRIPT_DIRECTORY = Path(__file__).resolve().parent
+if str(SCRIPT_DIRECTORY) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIRECTORY))
 
-
-def load_json(path: Path) -> dict[str, Any]:
-    with path.open("r", encoding="utf-8") as handle:
-        return json.load(handle)
+from atomic_repository_update import atomic_replace_text_files  # noqa: E402
+from repository_mode_support import (  # noqa: E402
+    RepositoryModeContext,
+    load_json,
+)
 
 
 def load_jsonl(path: Path) -> list[dict[str, Any]]:
@@ -22,28 +26,55 @@ def load_jsonl(path: Path) -> list[dict[str, Any]]:
         return [json.loads(line) for line in handle if line.strip()]
 
 
-def write_jsonl(path: Path, records: list[dict[str, Any]]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(
-        "".join(
-            json.dumps(record, ensure_ascii=False, sort_keys=True) + "\n"
-            for record in records
-        ),
-        encoding="utf-8",
+def serialize_jsonl(records: list[dict[str, Any]]) -> str:
+    return "".join(
+        json.dumps(record, ensure_ascii=False, sort_keys=True) + "\n"
+        for record in records
     )
 
 
-def rebuild_indexes(repository_root: Path) -> None:
-    project = load_json(repository_root / "author-lab-project-manifest.json")
-    work_items_root = repository_root / project["writing_work_items_directory"]
-    publications_root = repository_root / project["approved_publications_directory"]
-    publication_records = load_jsonl(
-        publications_root / "approved-publication-manifest.jsonl"
-    )
+def canonical_work_item_records(
+    repository_root: Path,
+    project: dict[str, Any],
+) -> list[tuple[Path, dict[str, Any]]]:
+    records: list[tuple[Path, dict[str, Any]]] = []
+    root = repository_root / project["writing_work_items_directory"]
+    for state_path in sorted(root.glob("**/work-item-state.json")):
+        records.append((state_path, load_json(state_path)))
+    return records
 
-    work_item_states: list[tuple[Path, dict[str, Any]]] = []
-    for state_path in work_items_root.glob("**/work-item-state.json"):
-        work_item_states.append((state_path, load_json(state_path)))
+
+def canonical_publication_records(
+    repository_root: Path,
+    project: dict[str, Any],
+) -> list[dict[str, Any]]:
+    manifest = (
+        repository_root
+        / project["approved_publications_directory"]
+        / "approved-publication-manifest.jsonl"
+    )
+    return load_jsonl(manifest)
+
+
+def build_persona_index_documents(
+    repository_root: Path,
+    project: dict[str, Any],
+    *,
+    publication_records: list[dict[str, Any]] | None = None,
+    work_item_states: list[tuple[Path, dict[str, Any]]] | None = None,
+) -> dict[Path, str]:
+    context = RepositoryModeContext(repository_root, project)
+    publications = (
+        publication_records
+        if publication_records is not None
+        else canonical_publication_records(repository_root, project)
+    )
+    work_items = (
+        work_item_states
+        if work_item_states is not None
+        else canonical_work_item_records(repository_root, project)
+    )
+    updates: dict[Path, str] = {}
 
     for persona_directory in project["derived_author_persona_directories"]:
         persona_root = repository_root / persona_directory
@@ -53,69 +84,90 @@ def rebuild_indexes(repository_root: Path) -> None:
         persona_id = persona_manifest["derived_author_id"]
 
         work_records: list[dict[str, Any]] = []
-        for state_path, state in work_item_states:
+        for state_path, state in work_items:
             if state.get("derived_author_id") != persona_id:
                 continue
             work_records.append(
-                {
-                    "_sample_comment": SAMPLE_MARKER,
-                    "derived_author_id": persona_id,
-                    "canonical_work_item_id": state["work_item_id"],
-                    "lifecycle_status": state.get("lifecycle_status"),
-                    "canonical_state_file": state_path.relative_to(repository_root).as_posix(),
-                }
+                context.with_json_marker(
+                    {
+                        "derived_author_id": persona_id,
+                        "canonical_work_item_id": state["work_item_id"],
+                        "lifecycle_status": state["lifecycle_status"],
+                        "canonical_state_file": state_path.relative_to(
+                            repository_root
+                        ).as_posix(),
+                    }
+                )
             )
-        if not work_records:
+        if not work_records and context.is_reference_sample:
             work_records = [
-                {
-                    "_sample_comment": SAMPLE_MARKER,
-                    "derived_author_id": persona_id,
-                    "index_status": "generated-empty",
-                    "canonical_work_item_id": None,
-                }
+                context.with_json_marker(
+                    {
+                        "derived_author_id": persona_id,
+                        "index_status": "generated-empty",
+                        "canonical_work_item_id": None,
+                    }
+                )
             ]
-        write_jsonl(
-            persona_root
-            / persona_manifest["work_items_directory"]
-            / "derived-author-work-item-index.jsonl",
-            sorted(
-                work_records,
-                key=lambda record: record.get("canonical_work_item_id") or "",
-            ),
-        )
 
         persona_publications: list[dict[str, Any]] = []
-        for publication in publication_records:
+        for publication in publications:
             if publication.get("derived_author_id") != persona_id:
                 continue
             persona_publications.append(
-                {
-                    "_sample_comment": SAMPLE_MARKER,
-                    "derived_author_id": persona_id,
-                    "canonical_publication_id": publication["publication_id"],
-                    "work_item_id": publication.get("work_item_id"),
-                    "publication_status": publication.get("publication_status"),
-                    "canonical_file": publication.get("canonical_file"),
-                }
+                context.with_json_marker(
+                    {
+                        "derived_author_id": persona_id,
+                        "canonical_publication_id": publication["publication_id"],
+                        "work_item_id": publication["work_item_id"],
+                        "publication_status": publication["publication_status"],
+                        "canonical_file": publication["canonical_file"],
+                    }
+                )
             )
-        if not persona_publications:
+        if not persona_publications and context.is_reference_sample:
             persona_publications = [
-                {
-                    "_sample_comment": SAMPLE_MARKER,
-                    "derived_author_id": persona_id,
-                    "index_status": "generated-empty",
-                    "canonical_publication_id": None,
-                }
+                context.with_json_marker(
+                    {
+                        "derived_author_id": persona_id,
+                        "index_status": "generated-empty",
+                        "canonical_publication_id": None,
+                    }
+                )
             ]
-        write_jsonl(
+
+        work_path = (
             persona_root
-            / persona_manifest["publications_directory"]
-            / "derived-author-publication-index.jsonl",
+            / persona_manifest.get(
+                "work_items_directory", "derived-author-writing-work-items"
+            )
+            / "derived-author-work-item-index.jsonl"
+        )
+        publication_path = (
+            persona_root
+            / persona_manifest.get(
+                "publications_directory", "derived-author-publications"
+            )
+            / "derived-author-publication-index.jsonl"
+        )
+        updates[work_path] = serialize_jsonl(
+            sorted(
+                work_records,
+                key=lambda record: record.get("canonical_work_item_id") or "",
+            )
+        )
+        updates[publication_path] = serialize_jsonl(
             sorted(
                 persona_publications,
                 key=lambda record: record.get("canonical_publication_id") or "",
-            ),
+            )
         )
+    return updates
+
+
+def rebuild_indexes(repository_root: Path) -> None:
+    project = load_json(repository_root / "author-lab-project-manifest.json")
+    atomic_replace_text_files(build_persona_index_documents(repository_root, project))
 
 
 def main() -> int:

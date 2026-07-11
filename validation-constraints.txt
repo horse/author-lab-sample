@@ -1,0 +1,6 @@
+# 这是一个 sample，文件实质完成后删掉这行注释
+
+jsonschema==4.23.0
+pytest==8.2.2
+ruff==0.5.7
+setuptools==69.5.1

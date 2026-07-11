@@ -119,4 +119,7 @@ def test_active_author_lab_rejects_unregistered_marker_and_missing_registered_ma
 
     errors = module.validate_placeholders(tmp_path)
     assert "unfinished.md: registered placeholder is missing its marker" in errors
-    assert "completed.md: unregistered production file still contains sample marker" in errors
+    assert any(
+        error.startswith("completed.md: unregistered production file contains sample sentinel")
+        for error in errors
+    )
