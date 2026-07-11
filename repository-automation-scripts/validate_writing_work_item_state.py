@@ -7,14 +7,10 @@ import json
 from pathlib import Path
 import sys
 
-ALLOWED_STATES = (
+ALLOWED_LIFECYCLE_STATUSES = (
     "intake",
-    "research",
-    "planned",
-    "drafted",
-    "fact-checked",
-    "style-reviewed",
-    "editor-review",
+    "in-progress",
+    "under-review",
     "approved",
     "published",
     "archived",
@@ -23,21 +19,38 @@ ALLOWED_STATES = (
 
 def validate_state_document(document: dict) -> list[str]:
     errors: list[str] = []
-    status = document.get("status")
-    reviews = document.get("reviews", {})
-    if status not in ALLOWED_STATES:
-        errors.append(f"Unknown work-item status: {status!r}")
+    lifecycle_status = document.get("lifecycle_status")
+    stage_executions = document.get("stage_executions", {})
+    quality_gates = document.get("quality_gates", {})
+
+    if lifecycle_status not in ALLOWED_LIFECYCLE_STATUSES:
+        errors.append(f"Unknown lifecycle_status: {lifecycle_status!r}")
         return errors
 
-    status_index = ALLOWED_STATES.index(status)
-    if status_index >= ALLOWED_STATES.index("fact-checked") and reviews.get("factual_review") != "passed":
-        errors.append("Status requires factual_review=passed.")
-    if status_index >= ALLOWED_STATES.index("style-reviewed") and reviews.get("style_review") != "passed":
-        errors.append("Status requires style_review=passed.")
-    if status_index >= ALLOWED_STATES.index("approved") and reviews.get("editor_review") != "approved":
-        errors.append("Approved or later status requires editor_review=approved.")
-    if status == "published" and not document.get("publication"):
-        errors.append("Published status requires publication metadata.")
+    factual_gate = quality_gates.get("factual_accuracy")
+    style_gate = quality_gates.get("persona_and_style")
+    editorial_gate = quality_gates.get("editorial_approval")
+
+    if factual_gate == "passed" and stage_executions.get("factual-review", {}).get("status") != "completed":
+        errors.append("factual_accuracy=passed requires factual-review stage status=completed.")
+    if style_gate == "passed" and stage_executions.get("style-review", {}).get("status") != "completed":
+        errors.append("persona_and_style=passed requires style-review stage status=completed.")
+
+    if lifecycle_status in {"under-review", "approved", "published", "archived"}:
+        if factual_gate != "passed":
+            errors.append(f"{lifecycle_status} requires factual_accuracy=passed.")
+        if style_gate != "passed":
+            errors.append(f"{lifecycle_status} requires persona_and_style=passed.")
+
+    if lifecycle_status in {"approved", "published", "archived"} and editorial_gate != "approved":
+        errors.append(f"{lifecycle_status} requires editorial_approval=approved.")
+
+    if lifecycle_status == "published" and not document.get("publication"):
+        errors.append("published lifecycle_status requires publication metadata.")
+
+    if editorial_gate == "approved" and stage_executions.get("editor-review", {}).get("status") != "completed":
+        errors.append("editorial_approval=approved requires editor-review stage status=completed.")
+
     return errors
 
 
