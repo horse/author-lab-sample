@@ -15,8 +15,38 @@ def load_script_module():
     return module
 
 
-def test_normalization_adds_stable_paragraph_identifiers():
+def test_normalization_adds_versioned_segment_identifiers_and_fingerprints():
     module = load_script_module()
-    result = module.normalize_text("First paragraph.\n\nSecond paragraph.\n", "SOURCE-TEST-0001")
-    assert "SOURCE-TEST-0001-paragraph-00001" in result
-    assert "SOURCE-TEST-0001-paragraph-00002" in result
+    normalized_text, location_records = module.normalize_text(
+        "First paragraph.\n\nSecond paragraph.\n",
+        source_id="SOURCE-TEST-0001",
+        edition_id="edition-01",
+        segmentation_version="segmentation-01",
+    )
+
+    assert "SOURCE-TEST-0001.edition-01.segmentation-01.segment-00001" in normalized_text
+    assert "SOURCE-TEST-0001.edition-01.segmentation-01.segment-00002" in normalized_text
+    assert len(location_records) == 2
+    assert location_records[0]["edition_id"] == "edition-01"
+    assert location_records[0]["segmentation_version"] == "segmentation-01"
+    assert len(location_records[0]["content_sha256"]) == 64
+    assert location_records[0]["segment_id"] in normalized_text
+
+
+def test_resegmentation_uses_a_new_namespace_even_for_unchanged_content():
+    module = load_script_module()
+    _, first_records = module.normalize_text(
+        "Same paragraph.",
+        source_id="SOURCE-TEST-0001",
+        edition_id="edition-01",
+        segmentation_version="segmentation-01",
+    )
+    _, second_records = module.normalize_text(
+        "Same paragraph.",
+        source_id="SOURCE-TEST-0001",
+        edition_id="edition-01",
+        segmentation_version="segmentation-02",
+    )
+
+    assert first_records[0]["content_sha256"] == second_records[0]["content_sha256"]
+    assert first_records[0]["segment_id"] != second_records[0]["segment_id"]
