@@ -1,0 +1,43 @@
+{
+  "_sample_comment": "这是一个 sample，文件实质完成后删掉这行注释",
+  "experiment_id": "experiment-2026-001-derived-author-distinction-sample",
+  "experiment_status": "designed",
+  "hypothesis_file": "hypothesis.md",
+  "controlled_input_directory": "controlled-inputs",
+  "conditions": [
+    {
+      "condition_id": "condition-generic-runtime-baseline",
+      "condition_role": "generic-runtime-baseline",
+      "author_condition": null,
+      "runtime_adapter_id": "chatgpt-runtime-adapter",
+      "runbook_id": "standard-researched-essay"
+    },
+    {
+      "condition_id": "condition-source-model-direct-baseline",
+      "condition_role": "source-model-direct-baseline",
+      "author_condition": "source-author-sample-model",
+      "runtime_adapter_id": "chatgpt-runtime-adapter",
+      "runbook_id": "standard-researched-essay"
+    },
+    {
+      "condition_id": "condition-derived-author-b",
+      "condition_role": "derived-author-b",
+      "author_condition": "derived-author-sample-b",
+      "runtime_adapter_id": "chatgpt-runtime-adapter",
+      "runbook_id": "standard-researched-essay"
+    },
+    {
+      "condition_id": "condition-derived-author-c",
+      "condition_role": "derived-author-c",
+      "author_condition": "derived-author-sample-c",
+      "runtime_adapter_id": "chatgpt-runtime-adapter",
+      "runbook_id": "standard-researched-essay"
+    }
+  ],
+  "held_out_evaluation_pack_uri": "evaluator-storage://author-lab-sample/experiment-2026-001/held-out-pack",
+  "runtime_run_records_directory": "runtime-run-records",
+  "raw_evaluation_results_file": "raw-evaluation-results.jsonl",
+  "aggregate_analysis_file": "aggregate-analysis.json",
+  "failure_cases_directory": "failure-cases",
+  "conclusion_file": "experiment-conclusion.md"
+}
