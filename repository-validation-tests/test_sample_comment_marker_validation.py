@@ -67,6 +67,25 @@ def test_reference_sample_requires_markers_on_all_managed_text_files(tmp_path):
     assert "README.md: missing required sample marker" in errors
 
 
+def test_generated_python_packaging_metadata_is_ignored(tmp_path):
+    module = load_script_module()
+    prepare_repository(
+        tmp_path,
+        mode="reference-sample",
+        policy="all-managed-text-files",
+        registered=[],
+    )
+    (tmp_path / "README.md").write_text(
+        f"# Sample\n\n<!-- {SAMPLE_MARKER} -->\n",
+        encoding="utf-8",
+    )
+    package_metadata = tmp_path / "author_lab_sample_tools.egg-info/PKG-INFO"
+    package_metadata.parent.mkdir(parents=True)
+    package_metadata.write_text("Generated metadata without marker.\n", encoding="utf-8")
+
+    assert module.validate_placeholders(tmp_path) == []
+
+
 def test_active_author_lab_allows_markers_only_on_registered_placeholders(tmp_path):
     module = load_script_module()
     prepare_repository(
