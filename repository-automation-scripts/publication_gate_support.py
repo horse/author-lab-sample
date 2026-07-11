@@ -25,7 +25,10 @@ def load_json(path: Path) -> dict[str, Any]:
 
 def write_json(path: Path, document: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(document, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    path.write_text(
+        json.dumps(document, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
 
 
 def iter_jsonl(path: Path) -> Iterable[dict[str, Any]]:
@@ -37,9 +40,15 @@ def iter_jsonl(path: Path) -> Iterable[dict[str, Any]]:
                 yield json.loads(line)
 
 
-def find_work_item(repository_root: Path, work_items_directory: str, work_item_id: str) -> tuple[Path, dict[str, Any]]:
+def find_work_item(
+    repository_root: Path,
+    work_items_directory: str,
+    work_item_id: str,
+) -> tuple[Path, dict[str, Any]]:
     matches = list(
-        (repository_root / work_items_directory).glob(f"**/{work_item_id}/work-item-state.json")
+        (repository_root / work_items_directory).glob(
+            f"**/{work_item_id}/work-item-state.json"
+        )
     )
     if len(matches) != 1:
         raise ValueError(
@@ -72,25 +81,35 @@ def validate_approved_work_item(
 
     final_file = work_root / "final-approved-article.md"
     if not final_file.is_file() or not final_file.read_text(encoding="utf-8").strip():
-        raise ValueError(f"Missing or empty final-approved-article.md for {state['work_item_id']}")
+        raise ValueError(
+            f"Missing or empty final-approved-article.md for {state['work_item_id']}"
+        )
 
     persona_id = state["derived_author_id"]
     persona_directories = project.get("derived_author_persona_directories", [])
     persona_roots: list[Path] = []
     for directory in persona_directories:
-        manifest_path = repository_root / directory / "derived-author-persona-manifest.json"
-        if manifest_path.is_file() and load_json(manifest_path).get("derived_author_id") == persona_id:
+        manifest_path = (
+            repository_root / directory / "derived-author-persona-manifest.json"
+        )
+        if manifest_path.is_file() and load_json(manifest_path).get(
+            "derived_author_id"
+        ) == persona_id:
             persona_roots.append(manifest_path.parent)
     if len(persona_roots) != 1:
         raise ValueError(f"Could not resolve exactly one persona for {persona_id}")
 
-    persona_manifest = load_json(persona_roots[0] / "derived-author-persona-manifest.json")
+    persona_manifest = load_json(
+        persona_roots[0] / "derived-author-persona-manifest.json"
+    )
     model_manifest = load_json(
         persona_roots[0]
         / persona_manifest["author_model_directory"]
         / "derived-author-model-manifest.json"
     )
-    if model_manifest["derived_author_model_id"] != state["derived_author_model_id"]:
+    if model_manifest["derived_author_model_id"] != state[
+        "derived_author_model_id"
+    ]:
         raise ValueError("Work-item model ID does not match the persona model")
     if model_manifest["model_version"] != state["derived_author_model_version"]:
         raise ValueError("Work-item model version does not match the persona model")
@@ -101,6 +120,8 @@ def validate_publication_record(
     repository_root: Path,
     project: dict[str, Any],
     record: dict[str, Any],
+    *,
+    require_canonical_file: bool = True,
 ) -> None:
     required = {
         "publication_id",
@@ -120,10 +141,13 @@ def validate_publication_record(
         )
     if record["publication_status"] not in ALLOWED_PUBLICATION_STATUSES:
         raise ValueError(
-            f"Invalid publication status for {record['publication_id']}: {record['publication_status']}"
+            f"Invalid publication status for {record['publication_id']}: "
+            f"{record['publication_status']}"
         )
     if record["publication_status"] == "published" and not record["published_at"]:
-        raise ValueError(f"Published record {record['publication_id']} requires published_at")
+        raise ValueError(
+            f"Published record {record['publication_id']} requires published_at"
+        )
 
     work_root, state = find_work_item(
         repository_root,
@@ -133,17 +157,28 @@ def validate_publication_record(
     if record["publication_status"] in {"approved", "published"}:
         validate_approved_work_item(repository_root, project, state, work_root)
     if state["derived_author_id"] != record["derived_author_id"]:
-        raise ValueError(f"Publication {record['publication_id']} has the wrong derived author")
+        raise ValueError(
+            f"Publication {record['publication_id']} has the wrong derived author"
+        )
     if state["derived_author_model_id"] != record["derived_author_model_id"]:
         raise ValueError(f"Publication {record['publication_id']} has the wrong model ID")
-    if state["derived_author_model_version"] != record["derived_author_model_version"]:
-        raise ValueError(f"Publication {record['publication_id']} has the wrong model version")
-
-    canonical_path = repository_root / record["canonical_file"]
-    if record["publication_status"] in {"approved", "published"} and not canonical_path.is_file():
+    if state["derived_author_model_version"] != record[
+        "derived_author_model_version"
+    ]:
         raise ValueError(
-            f"Publication {record['publication_id']} canonical file does not exist: {record['canonical_file']}"
+            f"Publication {record['publication_id']} has the wrong model version"
         )
+
+    if require_canonical_file and record["publication_status"] in {
+        "approved",
+        "published",
+    }:
+        canonical_path = repository_root / record["canonical_file"]
+        if not canonical_path.is_file():
+            raise ValueError(
+                f"Publication {record['publication_id']} canonical file does not exist: "
+                f"{record['canonical_file']}"
+            )
 
 
 def collect_publication_records(
@@ -184,5 +219,6 @@ def serialize_publication_manifest(records: list[dict[str, Any]]) -> str:
             sort_keys=True,
         ) + "\n"
     return "".join(
-        json.dumps(record, ensure_ascii=False, sort_keys=True) + "\n" for record in records
+        json.dumps(record, ensure_ascii=False, sort_keys=True) + "\n"
+        for record in records
     )
