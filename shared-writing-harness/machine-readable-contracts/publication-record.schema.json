@@ -3,16 +3,42 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Publication Record",
   "type": "object",
-  "required": ["publication_id", "work_item_id", "derived_author_id", "title", "publication_status"],
+  "required": [
+    "publication_id",
+    "work_item_id",
+    "derived_author_id",
+    "derived_author_model_id",
+    "derived_author_model_version",
+    "title",
+    "publication_status",
+    "canonical_file",
+    "published_at"
+  ],
   "properties": {
     "_sample_comment": {"type": "string"},
-    "publication_id": {"type": "string"},
+    "publication_id": {
+      "type": "string",
+      "pattern": "^(publication-[0-9]{4}-[0-9]{3}-[a-z0-9]+(?:-[a-z0-9]+)*|SAMPLE-NOT-PUBLISHED)$"
+    },
     "work_item_id": {"type": "string"},
     "derived_author_id": {"type": "string"},
-    "title": {"type": "string"},
+    "derived_author_model_id": {"type": "string"},
+    "derived_author_model_version": {"type": "string"},
+    "title": {"type": "string", "minLength": 1},
     "publication_status": {"enum": ["approved", "published", "withdrawn"]},
     "canonical_file": {"type": "string"},
     "published_at": {"type": ["string", "null"], "format": "date-time"}
   },
-  "additionalProperties": true
+  "allOf": [
+    {
+      "if": {
+        "properties": {"publication_status": {"const": "published"}},
+        "required": ["publication_status"]
+      },
+      "then": {
+        "properties": {"published_at": {"type": "string", "format": "date-time"}}
+      }
+    }
+  ],
+  "additionalProperties": false
 }
