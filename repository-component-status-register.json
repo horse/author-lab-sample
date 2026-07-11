@@ -1,0 +1,142 @@
+{
+  "_sample_comment": "这是一个 sample，文件实质完成后删掉这行注释",
+  "schema_version": "1.0.0",
+  "components": [
+    {
+      "component_id": "source-author-evidence-layer",
+      "path": "source-authors",
+      "component_class": "core",
+      "implementation_status": "implemented",
+      "validation_status": "schema-and-cross-reference-validated",
+      "production_ready": true
+    },
+    {
+      "component_id": "source-author-research-layer",
+      "path": "source-author-research",
+      "component_class": "core",
+      "implementation_status": "scaffolded",
+      "validation_status": "structure-validated",
+      "production_ready": false
+    },
+    {
+      "component_id": "source-author-model-layer",
+      "path": "source-author-models",
+      "component_class": "core",
+      "implementation_status": "scaffolded",
+      "validation_status": "schema-and-cross-reference-validated",
+      "production_ready": false
+    },
+    {
+      "component_id": "derived-author-persona-layer",
+      "path": "derived-author-personas",
+      "component_class": "core",
+      "implementation_status": "implemented",
+      "validation_status": "template-schema-and-cross-reference-validated",
+      "production_ready": true
+    },
+    {
+      "component_id": "shared-writing-harness",
+      "path": "shared-writing-harness",
+      "component_class": "core",
+      "implementation_status": "implemented",
+      "validation_status": "schema-validated",
+      "production_ready": true
+    },
+    {
+      "component_id": "writing-work-items",
+      "path": "writing-work-items",
+      "component_class": "core",
+      "implementation_status": "implemented",
+      "validation_status": "state-schema-and-cross-reference-validated",
+      "production_ready": true
+    },
+    {
+      "component_id": "author-model-evaluations",
+      "path": "author-model-evaluations",
+      "component_class": "core",
+      "implementation_status": "scaffolded",
+      "validation_status": "structure-validated",
+      "production_ready": false
+    },
+    {
+      "component_id": "author-model-experiments",
+      "path": "author-model-experiments",
+      "component_class": "core",
+      "implementation_status": "implemented",
+      "validation_status": "schema-and-scaffold-validated",
+      "production_ready": true
+    },
+    {
+      "component_id": "approved-publications",
+      "path": "approved-publications",
+      "component_class": "core",
+      "implementation_status": "implemented",
+      "validation_status": "transaction-gated",
+      "production_ready": true
+    },
+    {
+      "component_id": "chatgpt-runtime-adapter",
+      "path": "runtime-adapters/chatgpt-runtime-adapter",
+      "component_class": "optional",
+      "implementation_status": "scaffolded",
+      "validation_status": "configuration-schema-only",
+      "production_ready": false
+    },
+    {
+      "component_id": "openclaw-runtime-adapter",
+      "path": "runtime-adapters/openclaw-runtime-adapter",
+      "component_class": "optional",
+      "implementation_status": "scaffolded",
+      "validation_status": "configuration-schema-only",
+      "production_ready": false
+    },
+    {
+      "component_id": "codex-runtime-adapter",
+      "path": "runtime-adapters/codex-runtime-adapter",
+      "component_class": "optional",
+      "implementation_status": "scaffolded",
+      "validation_status": "configuration-schema-only",
+      "production_ready": false
+    },
+    {
+      "component_id": "claude-code-runtime-adapter",
+      "path": "runtime-adapters/claude-code-runtime-adapter",
+      "component_class": "optional",
+      "implementation_status": "scaffolded",
+      "validation_status": "configuration-schema-only",
+      "production_ready": false
+    },
+    {
+      "component_id": "local-command-line-runtime-adapter",
+      "path": "runtime-adapters/local-command-line-runtime-adapter",
+      "component_class": "optional",
+      "implementation_status": "scaffolded",
+      "validation_status": "configuration-schema-only",
+      "production_ready": false
+    },
+    {
+      "component_id": "publication-site",
+      "path": "publication-site",
+      "component_class": "optional",
+      "implementation_status": "example",
+      "validation_status": "configuration-schema-only",
+      "production_ready": false
+    },
+    {
+      "component_id": "sample-source-author",
+      "path": "source-authors/source-author-sample",
+      "component_class": "example",
+      "implementation_status": "scaffolded",
+      "validation_status": "schema-and-structure-validated",
+      "production_ready": false
+    },
+    {
+      "component_id": "sample-derived-authors",
+      "path": "derived-author-personas",
+      "component_class": "example",
+      "implementation_status": "scaffolded",
+      "validation_status": "template-validated",
+      "production_ready": false
+    }
+  ]
+}
