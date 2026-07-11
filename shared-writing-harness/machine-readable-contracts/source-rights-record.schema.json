@@ -1,0 +1,17 @@
+{
+  "_sample_comment": "这是一个 sample，文件实质完成后删掉这行注释",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Source Rights Record",
+  "type": "object",
+  "required": ["source_id", "rights_status", "redistribution_allowed", "storage_policy", "storage_uri", "repository_copy_allowed"],
+  "properties": {
+    "_sample_comment": {"type": "string"},
+    "source_id": {"type": "string", "pattern": "^SOURCE-"},
+    "rights_status": {"type": "string", "minLength": 1},
+    "redistribution_allowed": {"type": "boolean"},
+    "storage_policy": {"type": "string", "minLength": 1},
+    "storage_uri": {"type": "string", "pattern": "^(private-storage|repository-storage)://"},
+    "repository_copy_allowed": {"type": "boolean"}
+  },
+  "additionalProperties": false
+}
