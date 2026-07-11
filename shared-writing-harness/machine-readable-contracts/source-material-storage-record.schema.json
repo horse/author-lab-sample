@@ -1,0 +1,23 @@
+{
+  "_sample_comment": "这是一个 sample，文件实质完成后删掉这行注释",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Source Material Storage and Ingestion Record",
+  "type": "object",
+  "required": ["source_id", "source_author_id", "material_type", "storage_uri", "repository_copy_allowed", "rights_status", "checksum_algorithm", "checksum_value", "ingestion_status", "normalization_status", "segmentation_version", "research_ready"],
+  "properties": {
+    "_sample_comment": {"type": "string"},
+    "source_id": {"type": "string", "pattern": "^SOURCE-"},
+    "source_author_id": {"type": "string"},
+    "material_type": {"type": "string"},
+    "storage_uri": {"type": "string", "pattern": "^(private-storage|repository-storage)://"},
+    "repository_copy_allowed": {"type": "boolean"},
+    "rights_status": {"type": "string"},
+    "checksum_algorithm": {"const": "sha256"},
+    "checksum_value": {"type": "string", "minLength": 1},
+    "ingestion_status": {"enum": ["registered", "available", "unavailable", "withdrawn"]},
+    "normalization_status": {"enum": ["not-started", "sample-placeholder", "in-progress", "completed", "failed"]},
+    "segmentation_version": {"type": ["string", "null"]},
+    "research_ready": {"type": "boolean"}
+  },
+  "additionalProperties": false
+}
