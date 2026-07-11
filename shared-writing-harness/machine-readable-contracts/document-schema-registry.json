@@ -1,0 +1,25 @@
+{
+  "_sample_comment": "这是一个 sample，文件实质完成后删掉这行注释",
+  "schema_version": "1.0.0",
+  "entries": [
+    {"path_pattern": "author-lab-project-manifest.json", "document_format": "json", "schema_path": "shared-writing-harness/machine-readable-contracts/author-lab-project-manifest.schema.json", "required_match": true},
+    {"path_pattern": "repository-component-status-register.json", "document_format": "json", "schema_path": "shared-writing-harness/machine-readable-contracts/repository-component-status-register.schema.json", "required_match": true},
+    {"path_pattern": "repository-placeholder-register.json", "document_format": "json", "schema_path": "shared-writing-harness/machine-readable-contracts/repository-placeholder-register.schema.json", "required_match": true},
+    {"path_pattern": "source-material-storage-and-ingestion-register.jsonl", "document_format": "jsonl", "schema_path": "shared-writing-harness/machine-readable-contracts/source-material-storage-record.schema.json", "required_match": true},
+    {"path_pattern": "source-authors/*/source-author-profile.json", "document_format": "json", "schema_path": "shared-writing-harness/machine-readable-contracts/source-author-profile.schema.json", "required_match": true},
+    {"path_pattern": "source-authors/*/source-corpus/source-corpus-manifest.jsonl", "document_format": "jsonl", "schema_path": "shared-writing-harness/machine-readable-contracts/source-corpus-record.schema.json", "required_match": true},
+    {"path_pattern": "source-author-models/*/source-author-model-manifest.json", "document_format": "json", "schema_path": "shared-writing-harness/machine-readable-contracts/source-author-model-manifest.schema.json", "required_match": true},
+    {"path_pattern": "derived-author-personas/*/derived-author-persona-manifest.json", "document_format": "json", "schema_path": "shared-writing-harness/machine-readable-contracts/derived-author-persona-manifest.schema.json", "required_match": true},
+    {"path_pattern": "derived-author-personas/*/derived-author-lineage.json", "document_format": "json", "schema_path": "shared-writing-harness/machine-readable-contracts/derived-author-lineage.schema.json", "required_match": true},
+    {"path_pattern": "shared-writing-harness/writing-runbooks/*/writing-runbook-manifest.json", "document_format": "json", "schema_path": "shared-writing-harness/machine-readable-contracts/writing-runbook-manifest.schema.json", "required_match": true},
+    {"path_pattern": "writing-work-items/**/work-item-state.json", "document_format": "json", "schema_path": "shared-writing-harness/machine-readable-contracts/writing-work-item-state.schema.json", "required_match": true},
+    {"path_pattern": "writing-work-items/**/writing-run-manifest.json", "document_format": "json", "schema_path": "shared-writing-harness/machine-readable-contracts/writing-run-manifest.schema.json", "required_match": true},
+    {"path_pattern": "writing-work-items/**/factual-review-result.json", "document_format": "json", "schema_path": "shared-writing-harness/machine-readable-contracts/factual-review-result.schema.json", "required_match": true},
+    {"path_pattern": "writing-work-items/**/style-review-result.json", "document_format": "json", "schema_path": "shared-writing-harness/machine-readable-contracts/style-review-result.schema.json", "required_match": true},
+    {"path_pattern": "runtime-adapters/*/runtime-adapter-configuration.json", "document_format": "json", "schema_path": "shared-writing-harness/machine-readable-contracts/runtime-adapter-configuration.schema.json", "required_match": true},
+    {"path_pattern": "approved-publications/approved-publication-manifest.jsonl", "document_format": "jsonl", "schema_path": "shared-writing-harness/machine-readable-contracts/publication-record.schema.json", "required_match": true},
+    {"path_pattern": "approved-publications/**/publication-metadata.json", "document_format": "json", "schema_path": "shared-writing-harness/machine-readable-contracts/publication-record.schema.json", "required_match": false},
+    {"path_pattern": "author-model-experiments/**/experiment-manifest.json", "document_format": "json", "schema_path": "shared-writing-harness/machine-readable-contracts/author-model-experiment-manifest.schema.json", "required_match": false},
+    {"path_pattern": "shared-writing-harness/harness-policies/policy-rule-register.jsonl", "document_format": "jsonl", "schema_path": "shared-writing-harness/machine-readable-contracts/policy-rule-record.schema.json", "required_match": true}
+  ]
+}
