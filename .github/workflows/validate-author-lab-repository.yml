@@ -26,8 +26,12 @@ jobs:
         run: python -m pip install -e '.[development]'
       - name: Validate repository structure
         run: python repository-automation-scripts/validate_author_lab_repository_structure.py
-      - name: Validate JSON and JSONL documents
+      - name: Validate JSON and JSONL syntax
         run: python repository-automation-scripts/validate_json_and_jsonl_documents.py
+      - name: Validate registered machine-readable contracts
+        run: python repository-automation-scripts/validate_machine_readable_contracts.py
+      - name: Validate repository cross references
+        run: python repository-automation-scripts/validate_repository_cross_references.py
       - name: Validate work-item states
         run: python repository-automation-scripts/validate_writing_work_item_state.py
       - name: Validate required sample markers
