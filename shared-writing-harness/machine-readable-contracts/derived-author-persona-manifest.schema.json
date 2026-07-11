@@ -1,0 +1,18 @@
+{
+  "_sample_comment": "这是一个 sample，文件实质完成后删掉这行注释",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Derived Author Persona Manifest",
+  "type": "object",
+  "required": ["derived_author_id", "display_name", "persona_type", "lineage_file", "author_model_directory"],
+  "properties": {
+    "_sample_comment": {"type": "string"},
+    "derived_author_id": {"type": "string"},
+    "display_name": {"type": "string"},
+    "persona_type": {"const": "derived-pseudonymous-author"},
+    "status": {"type": "string"},
+    "primary_language": {"type": "string"},
+    "lineage_file": {"type": "string"},
+    "author_model_directory": {"type": "string"}
+  },
+  "additionalProperties": true
+}

@@ -1,0 +1,17 @@
+{
+  "_sample_comment": "这是一个 sample，文件实质完成后删掉这行注释",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Source Author Profile",
+  "type": "object",
+  "required": ["source_author_id", "display_name", "author_type", "corpus_manifest"],
+  "properties": {
+    "_sample_comment": {"type": "string"},
+    "source_author_id": {"type": "string"},
+    "display_name": {"type": "string"},
+    "author_type": {"const": "real-source-author"},
+    "languages": {"type": "array", "items": {"type": "string"}},
+    "corpus_manifest": {"type": "string"},
+    "rights_register": {"type": "string"}
+  },
+  "additionalProperties": true
+}

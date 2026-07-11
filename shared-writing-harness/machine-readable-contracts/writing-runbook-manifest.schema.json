@@ -1,0 +1,16 @@
+{
+  "_sample_comment": "这是一个 sample，文件实质完成后删掉这行注释",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Writing Runbook Manifest",
+  "type": "object",
+  "required": ["runbook_id", "runbook_version", "required_stages", "required_artifacts"],
+  "properties": {
+    "_sample_comment": {"type": "string"},
+    "runbook_id": {"type": "string"},
+    "runbook_version": {"type": "string"},
+    "required_stages": {"type": "array", "items": {"type": "string"}},
+    "optional_stages": {"type": "array", "items": {"type": "string"}},
+    "required_artifacts": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": true
+}

@@ -1,0 +1,18 @@
+{
+  "_sample_comment": "这是一个 sample，文件实质完成后删掉这行注释",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Runtime Adapter Configuration",
+  "type": "object",
+  "required": ["runtime_adapter_id", "runtime_type", "configuration_version", "tool_capabilities"],
+  "properties": {
+    "_sample_comment": {"type": "string"},
+    "runtime_adapter_id": {"type": "string"},
+    "runtime_type": {"type": "string"},
+    "configuration_version": {"type": "string"},
+    "default_model_identifier": {"type": ["string", "null"]},
+    "context_window_tokens": {"type": ["integer", "null"]},
+    "tool_capabilities": {"type": "array", "items": {"type": "string"}},
+    "required_environment_variables": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": true
+}

@@ -1,0 +1,26 @@
+{
+  "_sample_comment": "这是一个 sample，文件实质完成后删掉这行注释",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Writing Work Item State",
+  "type": "object",
+  "required": ["work_item_id", "derived_author_id", "status", "author_model_version", "runbook_id", "runtime_adapter_id", "reviews"],
+  "properties": {
+    "_sample_comment": {"type": "string"},
+    "work_item_id": {"type": "string"},
+    "derived_author_id": {"type": "string"},
+    "status": {"enum": ["intake", "research", "planned", "drafted", "fact-checked", "style-reviewed", "editor-review", "approved", "published", "archived"]},
+    "author_model_version": {"type": "string"},
+    "runbook_id": {"type": "string"},
+    "runtime_adapter_id": {"type": "string"},
+    "reviews": {
+      "type": "object",
+      "required": ["factual_review", "style_review", "editor_review"],
+      "properties": {
+        "factual_review": {"enum": ["not-started", "pending", "passed", "failed"]},
+        "style_review": {"enum": ["not-started", "pending", "passed", "failed"]},
+        "editor_review": {"enum": ["not-started", "pending", "approved", "changes-requested", "rejected"]}
+      }
+    }
+  },
+  "additionalProperties": true
+}

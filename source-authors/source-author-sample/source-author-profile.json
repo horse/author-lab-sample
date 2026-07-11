@@ -1,0 +1,12 @@
+{
+  "_sample_comment": "这是一个 sample，文件实质完成后删掉这行注释",
+  "schema_version": "1.0.0",
+  "source_author_id": "source-author-sample",
+  "display_name": "Source Author Sample",
+  "author_type": "real-source-author",
+  "languages": ["zh-Hans"],
+  "corpus_manifest": "source-corpus/source-corpus-manifest.jsonl",
+  "rights_register": "source-rights-register.jsonl",
+  "research_directory": "../../../source-author-research/source-author-sample-research",
+  "compiled_model_directory": "../../../source-author-models/source-author-sample-model"
+}

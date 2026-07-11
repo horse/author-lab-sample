@@ -1,0 +1,13 @@
+{
+  "_sample_comment": "这是一个 sample，文件实质完成后删掉这行注释",
+  "run_id": "RUN-2026-001-001",
+  "work_item_id": "2026-001-sample-article",
+  "runtime_adapter_id": "chatgpt-runtime-adapter",
+  "model_identifier": "sample-model-not-executed",
+  "started_at": "2026-07-11T00:00:00+09:00",
+  "completed_at": "2026-07-11T00:01:00+09:00",
+  "loaded_files": [
+    "derived-author-personas/derived-author-sample-b/derived-author-model/derived-author-model-loading-map.json",
+    "shared-writing-harness/writing-runbooks/standard-researched-essay/writing-runbook-manifest.json"
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "_sample_comment": "这是一个 sample，文件实质完成后删掉这行注释",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "author-lab-project-manifest.schema.json",
+  "title": "Author Lab Project Manifest",
+  "type": "object",
+  "required": ["schema_version", "project_id", "project_type"],
+  "properties": {
+    "_sample_comment": {"type": "string"},
+    "schema_version": {"type": "string"},
+    "project_id": {"type": "string", "minLength": 1},
+    "project_type": {"const": "source-author-and-derived-author-laboratory"},
+    "default_language": {"type": "string"},
+    "repository_status": {"type": "string"},
+    "source_author_directories": {"type": "array", "items": {"type": "string"}},
+    "source_author_model_directories": {"type": "array", "items": {"type": "string"}},
+    "derived_author_persona_directories": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": true
+}

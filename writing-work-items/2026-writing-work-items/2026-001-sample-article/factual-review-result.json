@@ -1,0 +1,15 @@
+{
+  "_sample_comment": "这是一个 sample，文件实质完成后删掉这行注释",
+  "work_item_id": "2026-001-sample-article",
+  "review_status": "passed",
+  "claims": [
+    {
+      "claim_id": "CLAIM-0001",
+      "claim_text": "This repository is a sample architecture.",
+      "claim_type": "verified-fact",
+      "support_status": "supported",
+      "source_ids": ["WORK-SOURCE-0001"],
+      "as_of_date": "2026-07-11"
+    }
+  ]
+}

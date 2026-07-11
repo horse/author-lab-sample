@@ -1,0 +1,10 @@
+{
+  "_sample_comment": "这是一个 sample，文件实质完成后删掉这行注释",
+  "publication_id": "replace-with-publication-id",
+  "work_item_id": "replace-with-work-item-id",
+  "derived_author_id": "replace-with-derived-author-id",
+  "title": "Replace with final title",
+  "publication_status": "approved",
+  "canonical_file": "replace-with-canonical-file",
+  "published_at": null
+}

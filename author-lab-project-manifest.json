@@ -1,0 +1,23 @@
+{
+  "_sample_comment": "这是一个 sample，文件实质完成后删掉这行注释",
+  "schema_version": "1.0.0",
+  "project_id": "author-lab-sample",
+  "project_type": "source-author-and-derived-author-laboratory",
+  "default_language": "zh-Hans",
+  "repository_status": "sample-scaffold",
+  "source_author_directories": [
+    "source-authors/source-author-sample"
+  ],
+  "source_author_model_directories": [
+    "source-author-models/source-author-sample-model"
+  ],
+  "derived_author_persona_directories": [
+    "derived-author-personas/derived-author-sample-b",
+    "derived-author-personas/derived-author-sample-c"
+  ],
+  "shared_writing_harness_directory": "shared-writing-harness",
+  "writing_work_items_directory": "writing-work-items",
+  "approved_publications_directory": "approved-publications",
+  "rights_policy": "RIGHTS-AND-LICENSING-POLICY.md",
+  "ethics_policy": "ETHICS-AND-DERIVATION-DISCLOSURE-POLICY.md"
+}

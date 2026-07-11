@@ -1,0 +1,29 @@
+{
+  "_sample_comment": "这是一个 sample，文件实质完成后删掉这行注释",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Derived Author Lineage",
+  "type": "object",
+  "required": ["derived_author_id", "source_models", "may_claim_source_author_identity", "may_claim_source_author_experience"],
+  "properties": {
+    "_sample_comment": {"type": "string"},
+    "derived_author_id": {"type": "string"},
+    "source_models": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["source_author_model_id", "source_author_model_version", "role"],
+        "properties": {
+          "source_author_model_id": {"type": "string"},
+          "source_author_model_version": {"type": "string"},
+          "role": {"type": "string"},
+          "declared_design_weight": {"type": "number", "minimum": 0, "maximum": 1}
+        }
+      }
+    },
+    "may_claim_source_author_identity": {"const": false},
+    "may_claim_source_author_experience": {"const": false},
+    "may_quote_source_author_without_citation": {"const": false}
+  },
+  "additionalProperties": true
+}

@@ -1,0 +1,23 @@
+{
+  "_sample_comment": "这是一个 sample，文件实质完成后删掉这行注释",
+  "schema_version": "1.0.0",
+  "derived_author_id": "derived-author-sample-c",
+  "source_models": [
+    {
+      "source_author_model_id": "source-author-sample-model",
+      "source_author_model_version": "0.1.0",
+      "role": "primary-attention-and-life-writing-influence",
+      "declared_design_weight": 0.55
+    },
+    {
+      "source_author_model_id": "editorial-original-design",
+      "source_author_model_version": "0.1.0",
+      "role": "independent-cultural-and-formal-design",
+      "declared_design_weight": 0.45
+    }
+  ],
+  "may_claim_source_author_identity": false,
+  "may_claim_source_author_experience": false,
+  "may_quote_source_author_without_citation": false,
+  "independent_since": null
+}
