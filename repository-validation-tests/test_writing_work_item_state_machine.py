@@ -15,23 +15,59 @@ def load_script_module():
     return module
 
 
-def test_editor_review_state_accepts_passed_fact_and_style_reviews():
+def test_under_review_accepts_completed_fact_and_style_stages_with_passed_gates():
     module = load_script_module()
     document = {
-        "status": "editor-review",
-        "reviews": {"factual_review": "passed", "style_review": "passed", "editor_review": "pending"},
+        "lifecycle_status": "under-review",
+        "stage_executions": {
+            "factual-review": {"status": "completed"},
+            "style-review": {"status": "completed"},
+            "editor-review": {"status": "in-progress"},
+        },
+        "quality_gates": {
+            "factual_accuracy": "passed",
+            "persona_and_style": "passed",
+            "editorial_approval": "pending",
+        },
         "publication": None,
     }
     assert module.validate_state_document(document) == []
 
 
-def test_published_state_rejects_missing_editor_approval_and_publication_metadata():
+def test_published_rejects_missing_editor_approval_and_publication_metadata():
     module = load_script_module()
     document = {
-        "status": "published",
-        "reviews": {"factual_review": "passed", "style_review": "passed", "editor_review": "pending"},
+        "lifecycle_status": "published",
+        "stage_executions": {
+            "factual-review": {"status": "completed"},
+            "style-review": {"status": "completed"},
+            "editor-review": {"status": "in-progress"},
+        },
+        "quality_gates": {
+            "factual_accuracy": "passed",
+            "persona_and_style": "passed",
+            "editorial_approval": "pending",
+        },
         "publication": None,
     }
     errors = module.validate_state_document(document)
-    assert "Approved or later status requires editor_review=approved." in errors
-    assert "Published status requires publication metadata." in errors
+    assert "published requires editorial_approval=approved." in errors
+    assert "published lifecycle_status requires publication metadata." in errors
+
+
+def test_passed_gate_requires_corresponding_stage_completion():
+    module = load_script_module()
+    document = {
+        "lifecycle_status": "in-progress",
+        "stage_executions": {
+            "factual-review": {"status": "in-progress"},
+            "style-review": {"status": "not-started"},
+        },
+        "quality_gates": {
+            "factual_accuracy": "passed",
+            "persona_and_style": "not-evaluated",
+            "editorial_approval": "not-evaluated",
+        },
+        "publication": None,
+    }
+    assert "factual_accuracy=passed requires factual-review stage status=completed." in module.validate_state_document(document)
