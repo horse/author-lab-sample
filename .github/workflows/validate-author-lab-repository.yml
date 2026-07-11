@@ -32,10 +32,14 @@ jobs:
         run: python repository-automation-scripts/validate_machine_readable_contracts.py
       - name: Validate repository cross references
         run: python repository-automation-scripts/validate_repository_cross_references.py
+      - name: Validate source research and model provenance
+        run: python repository-automation-scripts/validate_source_research_and_model_provenance.py
       - name: Validate canonical policy references
         run: python repository-automation-scripts/validate_policy_rule_references.py
       - name: Validate work-item states
         run: python repository-automation-scripts/validate_writing_work_item_state.py
+      - name: Validate writing run reproducibility
+        run: python repository-automation-scripts/validate_writing_run_reproducibility.py
       - name: Validate repository placeholders
         shell: bash
         run: |
