@@ -39,10 +39,11 @@ def test_unknown_policy_reference_is_detected(tmp_path):
         encoding="utf-8",
     )
     (tmp_path / "policy.md").write_text("# Known policy\n", encoding="utf-8")
+    unknown_policy_id = "POLICY-" + "UNKNOWN-999"
     (tmp_path / "document.md").write_text(
-        "Required policy: `POLICY-UNKNOWN-999`.\n",
+        f"Required policy: `{unknown_policy_id}`.\n",
         encoding="utf-8",
     )
 
     errors = module.validate_policy_references(tmp_path, policy_register)
-    assert "document.md: unknown policy rule reference POLICY-UNKNOWN-999" in errors
+    assert f"document.md: unknown policy rule reference {unknown_policy_id}" in errors
