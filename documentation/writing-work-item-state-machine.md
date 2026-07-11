@@ -2,11 +2,9 @@
 
 <!-- 这是一个 sample，文件实质完成后删掉这行注释 -->
 
-写作工作项不再用一个 `status` 字段同时表达“整体生命周期”“runbook 阶段”和“质量审核”。这三个维度必须分开记录。
+写作工作项必须把总体生命周期、runbook 阶段、质量判断、不可变运行历史和出版状态分开记录。任何一个字段都不能替代其他维度。
 
 ## 一、Lifecycle status
-
-`lifecycle_status` 表示工作项在整个生产过程中的总体位置：
 
 ```text
 intake
@@ -14,21 +12,38 @@ intake
   → under-review
   → approved
   → published
-  → archived
 ```
 
-- `intake`：任务已创建，brief 尚未完成。
-- `in-progress`：research、planning、drafting 或 revision 正在进行。
-- `under-review`：事实与 persona/style gate 已通过，编辑审核正在进行；或者编辑已经要求修改。
-- `approved`：事实、persona/style 和编辑三个 gate 均通过，最终稿可进入出版准备。
-- `published`：publication transaction 已成功写入 canonical publication、metadata、manifest 和 state。
-- `archived`：任务不再活动，但所有历史工件、审核和运行记录继续保留。
+不成功或停止的分支：
 
-编辑退回不需要恢复旧式 `planned` 或 `drafted` lifecycle。具体回退目标由 `stage_executions` 表示，例如把 `research`、`planning`、`drafting` 或 `editorial-revision` 重新标记为 `in-progress`，并在编辑审核文件中记录理由。
+```text
+rejected | cancelled | abandoned | superseded
+```
+
+任何终态都可以在记录原因后进入：
+
+```text
+archived
+```
+
+含义：
+
+- `intake`：任务刚建立，brief 和执行边界尚未完成。
+- `in-progress`：research、planning、drafting 或 revision 正在进行。
+- `under-review`：事实与 persona/style gate 已通过，编辑审核或编辑退回正在处理。
+- `approved`：三个质量 gate 均通过，可进入出版准备。
+- `published`：recoverable publication transaction 已成功提交 canonical article、metadata、manifest、state 和 persona indexes。
+- `rejected`：编辑明确拒绝，不要求伪造已通过的 gate。
+- `cancelled`：因外部决策停止。
+- `abandoned`：工作长期停止且不再继续。
+- `superseded`：被另一个 work item 取代。
+- `archived`：不再活动；必须有非空 `archive_reason`，但不要求此前成功通过 gate。
+
+只有 `approved` 和 `published` 强制 factual、persona/style 与 editorial 三个 gate 全部成功。失败、取消和替代状态必须保留原始工件与失败证据。
 
 ## 二、Stage executions
 
-`stage_executions` 来自选定的 `writing-runbook-manifest.json`。每个 runbook 可以拥有不同阶段，例如：
+`stage_executions` 由选定的 `writing-runbook-manifest.json` 生成。不同 runbook 可以包含：
 
 - `research-review`
 - `scene-authorization`
@@ -36,35 +51,36 @@ intake
 - `semantic-review`
 - `second-factual-review`
 - `editorial-revision`
+- `publication-preparation`
 
-每个 stage 使用：
+状态：
 
 ```text
-not-started
-in-progress
-completed
-failed
-skipped
+not-started | in-progress | completed | failed | skipped
 ```
 
-可选 stage 可以是 `skipped`，但 required stage 在进入相关 gate 前必须 `completed`。新 work item 由脚手架读取 runbook 的 `required_stages` 与 `optional_stages` 自动建立 stage 记录，不允许手工维护另一套阶段清单。
-
-推荐的 stage record：
+推荐记录：
 
 ```json
 {
   "status": "completed",
   "started_at": "2026-07-11T10:00:00+09:00",
   "completed_at": "2026-07-11T10:12:00+09:00",
-  "run_id": "RUN-2026-001-FACT-01"
+  "run_id": "run-2026-001-fact-01"
 }
 ```
 
-真实运行时应记录 `run_id`；sample 可以省略时间和 run ID。
+Required stage 在相关 gate 通过前必须完成；optional stage 可以 `skipped`。脚手架读取 runbook 自动创建阶段，不允许在脚本中维护第二套阶段清单。
 
 ## 三、Quality gates
 
-`quality_gates` 只有三项：
+```text
+factual_accuracy
+tpersona_and_style
+editorial_approval
+```
+
+其中实际字段名是 `persona_and_style`；上面的 `t` 不是字段字符，应读取为：
 
 ```text
 factual_accuracy
@@ -72,7 +88,7 @@ persona_and_style
 editorial_approval
 ```
 
-它们不是“某一步运行过”，而是独立判断：
+取值：
 
 - `factual_accuracy`：`not-evaluated | pending | passed | failed`
 - `persona_and_style`：`not-evaluated | pending | passed | failed`
@@ -80,61 +96,103 @@ editorial_approval
 
 必要关系：
 
-- `factual_accuracy=passed` 要求 `factual-review` stage 为 `completed`；
-- `persona_and_style=passed` 要求 `style-review` stage 为 `completed`；
-- `editorial_approval=approved` 要求 `editor-review` stage 为 `completed`；
-- `under-review` 及以后要求 factual 和 persona/style 已通过；
-- `approved` 及以后要求 editor 已批准；
-- `published` 要求 publication metadata 已写入 state。
+- factual gate 通过要求 `factual-review=completed`；
+- persona/style gate 通过要求 `style-review=completed`；
+- editor approval 通过要求 `editor-review=completed`；
+- `approved` 与 `published` 要求三项 gate 全部通过；
+- `published` 还要求完整、typed publication metadata。
 
 ## 四、Runbook 与工件
-
-Runbook 是 stages 和 required artifacts 的唯一权威来源：
 
 ```text
 writing-runbook-manifest.json
   → required_stages / optional_stages
   → required_artifacts / artifact_templates
   → create_new_writing_work_item.py
-  → work-item-state.json + 完整工件目录
+  → staged work-item tree
+  → atomic promotion to canonical path
 ```
 
-validator 会检查：
+脚手架在临时 sibling 目录中生成全部工件；任一模板缺失或渲染失败时，不得留下半成品目录。
 
-- state 中是否包含 runbook 的所有 required/optional stages；
-- work-item 目录是否包含所有 required artifacts；
-- runbook 中每个 required artifact 是否有 template；
-- template 路径是否真实存在；
-- policy rule ID 是否在 canonical policy register 中存在。
+Validator 检查：
 
-## 五、不可覆盖原则
+- state 是否包含所有 required/optional stages；
+- required artifacts 是否存在；
+- 每个 artifact 是否有真实模板；
+- persona/model/runbook/runtime ID 与版本是否解析；
+- policy IDs 是否属于 canonical register；
+- `writing-runs/` 是否存在。
 
-- `draft-01.md` 完成后不得覆盖；后续版本使用 `draft-02-after-review.md` 等新文件。
-- `writing-run-manifest.json` 应记录每次实际运行；多次运行时不得用最后一次结果覆盖早期失败记录。
-- factual/style/editor review 的新一轮结果应保留历史或使用明确的新文件名。
-- 失败、回退和排除必须记录，不能通过删除工件伪造顺利流程。
+## 五、不可变运行历史
 
-## 六、出版事务
+旧的单一 `writing-run-manifest.json` 已删除。每次执行必须建立：
 
-`approved` 只是允许进入出版准备，不等于已经出版。
+```text
+writing-runs/run-*.json
+writing-runs/<run-id>/...
+```
 
-正式发布必须通过：
+每个运行记录固定：
+
+- `repository_commit_sha`；
+- derived model、runbook、runtime 的 ID 与版本；
+- model identifier 与参数；
+- context budget 与工具权限；
+- loaded file path 与 SHA-256；
+- timestamps、exit status 和 output paths。
+
+验证器使用：
+
+```text
+git show <repository_commit_sha>:<loaded-path>
+```
+
+读取历史 commit 中的内容并校验 hash，而不是把旧 run 与当前 HEAD 比较。Run ID 必须唯一；输出必须位于 `writing-runs/<run-id>/`；path traversal、未知 commit 和覆盖旧 run 都是错误。
+
+Reference sample 可以保留一个明确的 `run-sample-not-run.json`。Active author lab 不允许 fake not-run record。
+
+## 六、Publication metadata
+
+`publication` 只能是 `null` 或结构化对象：
+
+```json
+{
+  "publication_id": "publication-2026-001-example",
+  "publication_status": "published",
+  "canonical_file": "approved-publications/researched-essays/publication-2026-001-example/article.md",
+  "published_at": "2026-07-11T12:00:00+09:00"
+}
+```
+
+`published` lifecycle 必须对应 `publication_status=published`。零出版物由空 `approved-publication-manifest.jsonl` 表示，不使用 Sample B 或其他假记录。
+
+## 七、可恢复出版事务
+
+正式发布只能通过：
 
 ```text
 publish_approved_writing_work_item.py
 ```
 
-事务将验证：
+事务流程：
 
-1. factual gate 通过；
-2. persona/style gate 通过；
-3. editor approval 为 approved；
-4. 三个审核 stage 已完成；
-5. `final-approved-article.md` 存在且非空；
-6. work item 使用的 persona/model ID 与版本仍然匹配；
-7. publication category、ID、status 和 metadata 合法；
-8. canonical 文件写入成功；
-9. publication manifest 重建成功；
-10. work-item state 更新成功。
+1. 恢复任何未完成 journal；
+2. 获取 repository publication lock；
+3. 验证 gates、review stages、final article 与 persona/model version；
+4. 在 staging 中准备 article 与 metadata；
+5. 预计算新 manifest、work-item state 和 persona indexes；
+6. 写 transaction journal 与旧内容 backups；
+7. 原子移动 canonical publication；
+8. 联合替换 manifest、state 与 indexes；
+9. 删除 journal、staging 和 lock。
 
-中间失败时应回滚 canonical 目录、manifest 和 state，避免半发布状态。
+任何 Python 异常会回滚；进程中断后，下次调用会根据 journal 恢复。CI 还会独立运行 `validate_publication_integrity.py`，检查：
+
+- 没有残留 journal、lock 或非空 staging；
+- manifest 与 canonical metadata 完全一致；
+- canonical article 与 work-item final 的 SHA-256 一致；
+- state linkage 正确；
+- persona work/publication indexes 可从 canonical 对象精确重建。
+
+因此，手工复制文章或手改 manifest 不能绕过 publication gate。
