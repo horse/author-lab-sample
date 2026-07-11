@@ -3,19 +3,38 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Source Corpus Record",
   "type": "object",
-  "required": ["source_id", "source_type", "title", "rights_status"],
+  "required": [
+    "source_id",
+    "source_type",
+    "title",
+    "creator",
+    "year",
+    "language",
+    "edition_id",
+    "storage_uri",
+    "normalized_text",
+    "segment_location_map",
+    "rights_status",
+    "checksum_algorithm",
+    "checksum_value",
+    "segmentation_version"
+  ],
   "properties": {
     "_sample_comment": {"type": "string"},
     "source_id": {"type": "string", "pattern": "^SOURCE-"},
     "source_type": {"enum": ["book", "essay", "interview", "letter", "diary", "speech", "social-media", "secondary-source"]},
-    "title": {"type": "string"},
-    "creator": {"type": "string"},
+    "title": {"type": "string", "minLength": 1},
+    "creator": {"type": "string", "minLength": 1},
     "year": {"type": ["integer", "null"]},
-    "language": {"type": "string"},
-    "original_file": {"type": ["string", "null"]},
-    "normalized_text": {"type": ["string", "null"]},
-    "rights_status": {"type": "string"},
-    "sha256": {"type": ["string", "null"]}
+    "language": {"type": "string", "minLength": 1},
+    "edition_id": {"type": "string", "pattern": "^edition-[0-9]{2,}$"},
+    "storage_uri": {"type": "string", "pattern": "^(private-storage|repository-storage)://"},
+    "normalized_text": {"type": "string", "minLength": 1},
+    "segment_location_map": {"type": "string", "minLength": 1},
+    "rights_status": {"type": "string", "minLength": 1},
+    "checksum_algorithm": {"const": "sha256"},
+    "checksum_value": {"type": "string", "minLength": 1},
+    "segmentation_version": {"type": "string", "pattern": "^segmentation-[0-9]{2,}$"}
   },
-  "additionalProperties": true
+  "additionalProperties": false
 }
